@@ -13,9 +13,9 @@ from crewai import Agent, Crew, Process, Task, LLM
 
 st.set_page_config(
     page_title="ResumeIQ",
-    page_icon="✦",
+    page_icon=None,
     layout="wide",
-    initial_sidebar_state="collapsed",
+    initial_sidebar_state="expanded",
 )
 
 
@@ -27,43 +27,31 @@ st.markdown(
     """
     <style>
 
-    /* ======================================================
+    /* ========================================================
        GLOBAL
-    ====================================================== */
+       ======================================================== */
 
     .stApp {
         background:
             radial-gradient(
-                circle at 15% 0%,
-                rgba(124, 58, 237, 0.18),
-                transparent 28%
+                circle at 20% 0%,
+                rgba(91, 33, 182, 0.16),
+                transparent 30%
             ),
-            radial-gradient(
-                circle at 85% 5%,
-                rgba(168, 85, 247, 0.12),
-                transparent 25%
-            ),
-            linear-gradient(
-                180deg,
-                #090611 0%,
-                #0c0815 45%,
-                #090611 100%
-            );
+            #0a0710;
 
-        color: #f5f3ff;
+        color: #f5f3fa;
     }
-
 
     .main .block-container {
         max-width: 1180px;
-        padding-top: 2rem;
+        padding-top: 3rem;
         padding-bottom: 4rem;
     }
 
-
-    /* ======================================================
-       REMOVE STREAMLIT CHROME
-    ====================================================== */
+    header {
+        background: transparent !important;
+    }
 
     #MainMenu {
         visibility: hidden;
@@ -73,602 +61,366 @@ st.markdown(
         visibility: hidden;
     }
 
-    header {
-        background: transparent !important;
+
+    /* ========================================================
+       SIDEBAR
+       ======================================================== */
+
+    [data-testid="stSidebar"] {
+        background: #100b18;
+        border-left: 1px solid rgba(139, 92, 246, 0.15);
+        border-right: none;
     }
 
-
-    /* ======================================================
-       TEXT
-    ====================================================== */
-
-    h1, h2, h3, h4 {
-        color: #f8f7ff !important;
+    [data-testid="stSidebar"] > div:first-child {
+        padding: 2rem 1.3rem;
     }
 
-    p {
-        color: #aaa3b8;
-    }
-
-
-    /* ======================================================
-       HERO
-    ====================================================== */
-
-    .hero-wrapper {
-        text-align: center;
-        padding: 3rem 1rem 2.5rem;
-    }
-
-
-    .hero-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-
-        padding: 7px 13px;
-
-        border-radius: 999px;
-
-        background: rgba(124, 58, 237, 0.10);
-
-        border: 1px solid rgba(167, 139, 250, 0.25);
-
-        color: #c4b5fd;
-
-        font-size: 0.78rem;
+    .sidebar-title {
+        font-size: 1.1rem;
         font-weight: 700;
-
-        letter-spacing: 0.04em;
+        color: #f5f3fa;
+        margin-bottom: 0.4rem;
     }
 
+    .sidebar-description {
+        color: #8f879d;
+        font-size: 0.85rem;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+    }
+
+    .sidebar-section {
+        color: #c4b5fd;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        margin-top: 1.5rem;
+        margin-bottom: 0.7rem;
+    }
+
+    .sidebar-item {
+        color: #aaa2b7;
+        font-size: 0.85rem;
+        line-height: 1.6;
+        margin-bottom: 0.7rem;
+    }
+
+
+    /* ========================================================
+       HERO
+       ======================================================== */
+
+    .hero {
+        margin-bottom: 3rem;
+    }
+
+    .hero-label {
+        color: #a78bfa;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        margin-bottom: 0.8rem;
+    }
 
     .hero-title {
-        margin-top: 1rem;
-
-        font-size: clamp(3rem, 7vw, 5.3rem);
-
-        font-weight: 850;
-
-        line-height: 0.95;
-
-        letter-spacing: -0.06em;
-
-        background: linear-gradient(
-            135deg,
-            #ffffff 20%,
-            #ddd6fe 55%,
-            #a78bfa 100%
-        );
-
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
-
-    .hero-subtitle {
-        max-width: 650px;
-
-        margin: 1.25rem auto 0;
-
-        font-size: 1rem;
-
-        line-height: 1.7;
-
-        color: #938ba5;
-    }
-
-
-    /* ======================================================
-       SECTION LABEL
-    ====================================================== */
-
-    .eyebrow {
-        font-size: 0.72rem;
-
-        text-transform: uppercase;
-
-        letter-spacing: 0.13em;
-
-        color: #8b5cf6;
-
+        color: #faf9ff;
+        font-size: clamp(2.8rem, 6vw, 4.5rem);
         font-weight: 800;
-
-        margin-bottom: 0.45rem;
+        letter-spacing: -0.055em;
+        line-height: 0.98;
+        margin: 0;
     }
 
-
-    .section-heading {
-        font-size: 1.15rem;
-
-        font-weight: 750;
-
-        color: #f5f3ff;
-
-        margin-bottom: 0.25rem;
+    .hero-title span {
+        color: #a78bfa;
     }
 
-
-    .section-subheading {
-        color: #81798e;
-
-        font-size: 0.84rem;
-
-        margin-bottom: 1.2rem;
-    }
-
-
-    /* ======================================================
-       GLASS CARD
-    ====================================================== */
-
-    .card {
-        background:
-            linear-gradient(
-                145deg,
-                rgba(27, 20, 42, 0.86),
-                rgba(16, 11, 26, 0.88)
-            );
-
-        border: 1px solid rgba(167, 139, 250, 0.14);
-
-        border-radius: 20px;
-
-        padding: 1.35rem;
-
-        box-shadow:
-            0 20px 60px rgba(0, 0, 0, 0.28),
-            inset 0 1px 0 rgba(255, 255, 255, 0.025);
-
-        margin-bottom: 1rem;
-    }
-
-
-    .card-header {
-        display: flex;
-
-        align-items: center;
-
-        gap: 12px;
-
-        margin-bottom: 1rem;
-    }
-
-
-    .icon-box {
-        width: 38px;
-        height: 38px;
-
-        display: flex;
-
-        align-items: center;
-        justify-content: center;
-
-        border-radius: 11px;
-
-        background: rgba(124, 58, 237, 0.13);
-
-        border: 1px solid rgba(167, 139, 250, 0.18);
-
+    .hero-description {
+        max-width: 700px;
+        margin-top: 1.2rem;
+        color: #958ca3;
         font-size: 1rem;
-    }
-
-
-    /* ======================================================
-       INPUTS
-    ====================================================== */
-
-    .stTextArea textarea {
-
-        background: #0e0a17 !important;
-
-        color: #eeeaff !important;
-
-        border: 1px solid rgba(167, 139, 250, 0.16) !important;
-
-        border-radius: 13px !important;
-
-        font-size: 0.9rem !important;
-
-        line-height: 1.6 !important;
-
-        padding: 1rem !important;
-    }
-
-
-    .stTextArea textarea:hover {
-
-        border-color: rgba(167, 139, 250, 0.30) !important;
-
-    }
-
-
-    .stTextArea textarea:focus {
-
-        border-color: #8b5cf6 !important;
-
-        box-shadow:
-            0 0 0 1px rgba(139, 92, 246, 0.5),
-            0 0 25px rgba(124, 58, 237, 0.10) !important;
-
-    }
-
-
-    /* ======================================================
-       FILE UPLOADER
-    ====================================================== */
-
-    [data-testid="stFileUploader"] {
-
-        background: rgba(14, 10, 23, 0.65);
-
-        border: 1px dashed rgba(139, 92, 246, 0.30);
-
-        border-radius: 14px;
-
-        padding: 0.4rem;
-
-        margin-top: 0.75rem;
-    }
-
-
-    [data-testid="stFileUploader"]:hover {
-
-        border-color: rgba(167, 139, 250, 0.55);
-
-    }
-
-
-    /* ======================================================
-       PRIMARY BUTTON
-    ====================================================== */
-
-    .stButton > button {
-
-        width: 100%;
-
-        min-height: 50px;
-
-        border-radius: 14px !important;
-
-        border: 1px solid rgba(196, 181, 253, 0.15) !important;
-
-        background:
-            linear-gradient(
-                135deg,
-                #7c3aed,
-                #9333ea
-            ) !important;
-
-        color: white !important;
-
-        font-weight: 750 !important;
-
-        font-size: 0.95rem !important;
-
-        box-shadow:
-            0 12px 30px rgba(124, 58, 237, 0.24);
-
-        transition:
-            transform 0.2s ease,
-            box-shadow 0.2s ease;
-    }
-
-
-    .stButton > button:hover {
-
-        transform: translateY(-2px);
-
-        box-shadow:
-            0 18px 38px rgba(124, 58, 237, 0.34);
-
-    }
-
-
-    /* ======================================================
-       RESULT HEADER
-    ====================================================== */
-
-    .result-header {
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: space-between;
-
-        gap: 1rem;
-
-        margin-top: 2.5rem;
-
-        margin-bottom: 1rem;
-    }
-
-
-    .result-title {
-
-        font-size: 1.65rem;
-
-        font-weight: 800;
-
-        color: #f8f7ff;
-
-        letter-spacing: -0.03em;
-    }
-
-
-    .result-label {
-
-        color: #81798e;
-
-        font-size: 0.8rem;
-    }
-
-
-    /* ======================================================
-       MATCH BADGES
-    ====================================================== */
-
-    .match-strong {
-
-        display: inline-block;
-
-        padding: 7px 13px;
-
-        border-radius: 999px;
-
-        background: rgba(34, 197, 94, 0.10);
-
-        border: 1px solid rgba(34, 197, 94, 0.22);
-
-        color: #86efac;
-
-        font-size: 0.78rem;
-
-        font-weight: 750;
-    }
-
-
-    .match-moderate {
-
-        display: inline-block;
-
-        padding: 7px 13px;
-
-        border-radius: 999px;
-
-        background: rgba(245, 158, 11, 0.10);
-
-        border: 1px solid rgba(245, 158, 11, 0.22);
-
-        color: #fcd34d;
-
-        font-size: 0.78rem;
-
-        font-weight: 750;
-    }
-
-
-    .match-needs {
-
-        display: inline-block;
-
-        padding: 7px 13px;
-
-        border-radius: 999px;
-
-        background: rgba(248, 113, 113, 0.10);
-
-        border: 1px solid rgba(248, 113, 113, 0.22);
-
-        color: #fca5a5;
-
-        font-size: 0.78rem;
-
-        font-weight: 750;
-    }
-
-
-    .match-default {
-
-        display: inline-block;
-
-        padding: 7px 13px;
-
-        border-radius: 999px;
-
-        background: rgba(167, 139, 250, 0.10);
-
-        border: 1px solid rgba(167, 139, 250, 0.22);
-
-        color: #c4b5fd;
-
-        font-size: 0.78rem;
-
-        font-weight: 750;
-    }
-
-
-    /* ======================================================
-       SUMMARY
-    ====================================================== */
-
-    .summary-card {
-
-        background:
-            linear-gradient(
-                135deg,
-                rgba(124, 58, 237, 0.12),
-                rgba(22, 16, 36, 0.75)
-            );
-
-        border: 1px solid rgba(167, 139, 250, 0.18);
-
-        border-radius: 20px;
-
-        padding: 1.5rem;
-
-        margin-bottom: 1rem;
-    }
-
-
-    .summary-text {
-
-        color: #d4cee0;
-
-        font-size: 0.96rem;
-
         line-height: 1.75;
     }
 
 
-    /* ======================================================
-       RESULT ITEMS
-    ====================================================== */
+    /* ========================================================
+       SECTION HEADINGS
+       ======================================================== */
 
-    .result-item {
+    .section-heading {
+        color: #f3f0f8;
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 0.35rem;
+    }
 
-        background: rgba(10, 7, 17, 0.55);
+    .section-subheading {
+        color: #81798d;
+        font-size: 0.84rem;
+        line-height: 1.5;
+        margin-bottom: 1.1rem;
+    }
 
-        border: 1px solid rgba(167, 139, 250, 0.10);
 
+    /* ========================================================
+       INPUT CARDS
+       ======================================================== */
+
+    .input-card {
+        background: rgba(18, 13, 27, 0.88);
+        border: 1px solid rgba(139, 92, 246, 0.14);
+        border-radius: 18px;
+        padding: 1.35rem;
+        height: 100%;
+    }
+
+
+    /* ========================================================
+       TEXT AREAS
+       ======================================================== */
+
+    .stTextArea textarea {
+        background: #0d0914 !important;
+        color: #eeeaf5 !important;
+
+        border: 1px solid rgba(139, 92, 246, 0.18) !important;
+
+        border-radius: 12px !important;
+
+        font-size: 0.9rem !important;
+
+        line-height: 1.6 !important;
+    }
+
+    .stTextArea textarea:focus {
+        border-color: #7c3aed !important;
+
+        box-shadow:
+            0 0 0 1px rgba(124, 58, 237, 0.45) !important;
+    }
+
+    .stTextArea label {
+        color: #a39aaa !important;
+    }
+
+
+    /* ========================================================
+       FILE UPLOADER
+       ======================================================== */
+
+    [data-testid="stFileUploader"] {
+        background: #0d0914;
+        border: 1px dashed rgba(139, 92, 246, 0.28);
         border-radius: 12px;
+        padding: 0.6rem;
+    }
 
-        padding: 0.75rem 0.85rem;
+    [data-testid="stFileUploader"] section {
+        background: transparent !important;
+        border: none !important;
+    }
 
-        margin: 0.45rem 0;
 
-        color: #c8c1d3;
+    /* ========================================================
+       BUTTON
+       ======================================================== */
 
-        font-size: 0.88rem;
+    .stButton > button {
+        width: 100%;
+
+        background: #7c3aed !important;
+        color: #ffffff !important;
+
+        border: none !important;
+        border-radius: 12px !important;
+
+        min-height: 48px;
+
+        font-size: 0.92rem !important;
+        font-weight: 700 !important;
+
+        transition:
+            background 0.2s ease,
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+
+        box-shadow:
+            0 10px 30px rgba(124, 58, 237, 0.22);
+    }
+
+    .stButton > button:hover {
+        background: #8b5cf6 !important;
+
+        transform: translateY(-1px);
+
+        box-shadow:
+            0 14px 35px rgba(124, 58, 237, 0.32);
+    }
+
+
+    /* ========================================================
+       RESULT CARDS
+       ======================================================== */
+
+    .result-card {
+        background: rgba(18, 13, 27, 0.9);
+
+        border: 1px solid rgba(139, 92, 246, 0.14);
+
+        border-radius: 18px;
+
+        padding: 1.35rem;
+
+        margin-bottom: 1rem;
+    }
+
+    .result-heading {
+        color: #f4f1f8;
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 0.8rem;
+    }
+
+    .result-text {
+        color: #aaa1b4;
+        font-size: 0.9rem;
+        line-height: 1.7;
+    }
+
+
+    /* ========================================================
+       STATUS BADGE
+       ======================================================== */
+
+    .status-badge {
+        display: inline-block;
+
+        padding: 0.4rem 0.8rem;
+
+        border-radius: 999px;
+
+        background: rgba(124, 58, 237, 0.12);
+
+        border: 1px solid rgba(139, 92, 246, 0.3);
+
+        color: #c4b5fd;
+
+        font-size: 0.78rem;
+
+        font-weight: 700;
+    }
+
+
+    /* ========================================================
+       LIST ITEMS
+       ======================================================== */
+
+    .list-item {
+        background: #0e0a15;
+
+        border: 1px solid rgba(139, 92, 246, 0.09);
+
+        border-radius: 10px;
+
+        padding: 0.8rem 0.9rem;
+
+        margin-bottom: 0.55rem;
+
+        color: #b5adbf;
+
+        font-size: 0.87rem;
 
         line-height: 1.55;
     }
 
 
-    .result-item:hover {
-
-        border-color: rgba(167, 139, 250, 0.22);
-
-        background: rgba(124, 58, 237, 0.055);
-
-    }
-
-
-    /* ======================================================
-       REQUIREMENT STATUS
-    ====================================================== */
-
-    .status-demo {
-
-        color: #86efac;
-
-        font-weight: 700;
-    }
-
-
-    .status-partial {
-
-        color: #fcd34d;
-
-        font-weight: 700;
-    }
-
-
-    .status-missing {
-
-        color: #fca5a5;
-
-        font-weight: 700;
-    }
-
-
-    /* ======================================================
-       KEYWORD PILLS
-    ====================================================== */
-
-    .keyword-container {
-
-        display: flex;
-
-        flex-wrap: wrap;
-
-        gap: 8px;
-
-        margin-top: 0.7rem;
-    }
-
+    /* ========================================================
+       KEYWORD TAG
+       ======================================================== */
 
     .keyword {
-
         display: inline-block;
 
-        padding: 6px 10px;
+        background: rgba(124, 58, 237, 0.12);
 
-        border-radius: 8px;
-
-        background: rgba(124, 58, 237, 0.11);
-
-        border: 1px solid rgba(167, 139, 250, 0.18);
+        border: 1px solid rgba(139, 92, 246, 0.2);
 
         color: #c4b5fd;
 
-        font-size: 0.78rem;
+        border-radius: 7px;
 
-        font-weight: 600;
+        padding: 0.35rem 0.55rem;
+
+        margin: 0.2rem 0.15rem;
+
+        font-size: 0.76rem;
     }
 
 
-    /* ======================================================
+    /* ========================================================
+       EXPANDERS
+       ======================================================== */
+
+    [data-testid="stExpander"] {
+        background: #100b17 !important;
+
+        border: 1px solid rgba(139, 92, 246, 0.12) !important;
+
+        border-radius: 12px !important;
+
+        margin-bottom: 0.5rem;
+    }
+
+    [data-testid="stExpander"] summary {
+        color: #ddd7e5 !important;
+        font-size: 0.88rem !important;
+    }
+
+
+    /* ========================================================
+       ALERTS
+       ======================================================== */
+
+    [data-testid="stAlert"] {
+        border-radius: 12px;
+    }
+
+
+    /* ========================================================
        FOOTER
-    ====================================================== */
+       ======================================================== */
 
     .app-footer {
+        border-top: 1px solid rgba(139, 92, 246, 0.1);
 
-        text-align: center;
-
-        margin-top: 3rem;
+        margin-top: 4rem;
 
         padding-top: 1.5rem;
 
-        border-top: 1px solid rgba(167, 139, 250, 0.08);
+        text-align: center;
 
-        color: #625a6e;
+        color: #625a6d;
 
         font-size: 0.75rem;
     }
 
 
-    /* ======================================================
+    /* ========================================================
        MOBILE
-    ====================================================== */
+       ======================================================== */
 
     @media (max-width: 768px) {
 
         .main .block-container {
-
-            padding: 1rem;
-
-        }
-
-        .hero-wrapper {
-
-            padding: 1.5rem 0.5rem 2rem;
-
+            padding-top: 2rem;
         }
 
         .hero-title {
-
             font-size: 3rem;
-
-        }
-
-        .result-header {
-
-            flex-direction: column;
-
-            align-items: flex-start;
-
         }
 
     }
@@ -687,19 +439,126 @@ MODEL_NAME = "openai/gpt-oss-120b"
 
 
 # ============================================================
-# HELPER FUNCTIONS
+# RIGHT SIDEBAR
+# ============================================================
+
+with st.sidebar:
+
+    st.markdown(
+        """
+        <div class="sidebar-title">
+            ResumeIQ
+        </div>
+
+        <div class="sidebar-description">
+            AI-assisted resume analysis designed to help you
+            understand how closely your resume aligns with a
+            target role.
+        </div>
+
+        <div class="sidebar-section">
+            How it works
+        </div>
+
+        <div class="sidebar-item">
+            1. Add your resume
+        </div>
+
+        <div class="sidebar-item">
+            2. Add the target job description
+        </div>
+
+        <div class="sidebar-item">
+            3. Run the analysis
+        </div>
+
+        <div class="sidebar-item">
+            4. Review the recommendations
+        </div>
+
+        <div class="sidebar-section">
+            Review principles
+        </div>
+
+        <div class="sidebar-item">
+            Resume claims are evaluated only from the
+            information you provide.
+        </div>
+
+        <div class="sidebar-item">
+            The system does not invent qualifications,
+            experience, or skills.
+        </div>
+
+        <div class="sidebar-item">
+            Recommendations are informational and do not
+            guarantee hiring outcomes.
+        </div>
+
+        <div class="sidebar-section">
+            Technology
+        </div>
+
+        <div class="sidebar-item">
+            CrewAI
+        </div>
+
+        <div class="sidebar-item">
+            Groq
+        </div>
+
+        <div class="sidebar-item">
+            GPT-OSS-120B
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+# ============================================================
+# HERO
+# ============================================================
+
+st.markdown(
+    """
+    <div class="hero">
+
+        <div class="hero-label">
+            AI Resume Analysis
+        </div>
+
+        <div class="hero-title">
+            Resume<span>IQ</span>
+        </div>
+
+        <div class="hero-description">
+            Compare your resume with a target job description and
+            get structured, evidence-based recommendations for
+            improving your application.
+        </div>
+
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+
+# ============================================================
+# API KEY
 # ============================================================
 
 def get_api_key() -> str:
 
     try:
-
         return st.secrets["GROQ_API_KEY"]
 
     except Exception:
-
         return ""
 
+
+# ============================================================
+# PDF EXTRACTION
+# ============================================================
 
 def extract_pdf_text(uploaded_file) -> str:
 
@@ -730,21 +589,22 @@ def extract_pdf_text(uploaded_file) -> str:
         )
 
 
+# ============================================================
+# JSON PARSER
+# ============================================================
+
 def parse_agent_output(raw_output: Any) -> dict:
 
     if raw_output is None:
-
         raise ValueError(
             "The AI returned no output."
         )
 
     if hasattr(raw_output, "raw"):
-
         raw_output = raw_output.raw
 
     text = str(raw_output).strip()
 
-    # Remove markdown fences
     if text.startswith("```"):
 
         lines = text.splitlines()
@@ -800,16 +660,16 @@ def create_resume_agent(api_key: str):
         role="Professional Resume Reviewer",
 
         goal=(
-            "Compare a candidate's resume against a target job "
-            "description and provide accurate, evidence-based, "
-            "actionable recommendations."
+            "Compare a candidate's resume with a target job "
+            "description and provide accurate, evidence-based "
+            "recommendations."
         ),
 
         backstory=(
-            "You are an experienced resume reviewer and technical "
-            "recruiter. You carefully compare resumes with job "
+            "You are an experienced professional resume reviewer. "
+            "You carefully compare resume evidence against job "
             "requirements. You never fabricate qualifications, "
-            "experience, education, skills, certifications, or "
+            "skills, experience, education, certifications, or "
             "achievements."
         ),
 
@@ -836,48 +696,28 @@ def analyze_resume(
     agent = create_resume_agent(api_key)
 
     task_description = f"""
+Review the following resume against the target job description.
 
-You are reviewing a resume against a target job description.
-
-====================
-RESUME
-====================
-
+RESUME:
 {resume_text}
 
-
-====================
-JOB DESCRIPTION
-====================
-
+TARGET JOB DESCRIPTION:
 {job_description}
 
-
-====================
-IMPORTANT RULES
-====================
+Follow these rules:
 
 1. Never fabricate information.
-
-2. Never assume a skill exists unless the resume provides evidence.
-
-3. If something is missing or cannot be verified, say:
-"Not demonstrated in the provided resume."
-
+2. Only use evidence present in the resume.
+3. If a qualification or requirement is not demonstrated,
+   write exactly:
+   "Not demonstrated in the provided resume."
 4. Do not make hiring decisions.
-
 5. Do not infer sensitive personal characteristics.
-
-6. Base your analysis only on the provided resume and job description.
-
-7. Give practical and specific recommendations.
-
+6. Provide practical resume recommendations.
+7. Focus on the relationship between the resume and job description.
 8. Return ONLY valid JSON.
 
-
-====================
-REQUIRED JSON FORMAT
-====================
+Return this exact structure:
 
 {{
     "match_level": "Strong Match | Moderate Match | Needs Improvement",
@@ -893,7 +733,7 @@ REQUIRED JSON FORMAT
         {{
             "requirement": "Job requirement",
             "status": "Demonstrated | Partially Demonstrated | Not Demonstrated",
-            "evidence": "Evidence from resume or Not demonstrated in the provided resume."
+            "evidence": "Resume evidence"
         }}
     ],
 
@@ -918,22 +758,19 @@ REQUIRED JSON FORMAT
 
     "disclaimer": "This review compares the provided resume with the provided job description and does not guarantee hiring outcomes."
 }}
-
 """
 
     task = Task(
-
         description=task_description,
 
         expected_output=(
-            "Valid JSON matching the exact requested structure."
+            "Valid JSON matching the requested structure."
         ),
 
         agent=agent,
     )
 
     crew = Crew(
-
         agents=[agent],
 
         tasks=[task],
@@ -958,40 +795,9 @@ REQUIRED JSON FORMAT
             last_error = e
 
             if attempt < 2:
-
-                time.sleep(
-                    2 ** attempt
-                )
+                time.sleep(2 ** attempt)
 
     raise last_error
-
-
-# ============================================================
-# HERO
-# ============================================================
-
-st.markdown(
-    """
-    <div class="hero-wrapper">
-
-        <div class="hero-badge">
-            ✦ AI-POWERED RESUME ANALYSIS
-        </div>
-
-        <div class="hero-title">
-            ResumeIQ
-        </div>
-
-        <div class="hero-subtitle">
-            Understand how your resume aligns with a target role,
-            identify gaps, and get practical improvements backed by
-            the information actually present in your resume.
-        </div>
-
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
 
 
 # ============================================================
@@ -1004,38 +810,22 @@ left_column, right_column = st.columns(
 )
 
 
-# ============================================================
-# RESUME CARD
-# ============================================================
+# ------------------------------------------------------------
+# RESUME
+# ------------------------------------------------------------
 
 with left_column:
 
     st.markdown(
         """
-        <div class="card">
+        <div class="input-card">
 
-            <div class="card-header">
+            <div class="section-heading">
+                Resume
+            </div>
 
-                <div class="icon-box">
-                    📄
-                </div>
-
-                <div>
-
-                    <div class="eyebrow">
-                        STEP 01
-                    </div>
-
-                    <div class="section-heading">
-                        Your Resume
-                    </div>
-
-                    <div class="section-subheading">
-                        Paste your resume or upload a PDF.
-                    </div>
-
-                </div>
-
+            <div class="section-subheading">
+                Paste your resume or upload a PDF.
             </div>
 
         </div>
@@ -1043,58 +833,42 @@ with left_column:
         unsafe_allow_html=True,
     )
 
-
     resume_text = st.text_area(
-        "Resume text",
-        height=290,
+        "Resume content",
+
+        height=310,
+
         placeholder=(
-            "Paste your resume here...\n\n"
-            "Include your experience, skills, education, "
-            "projects, certifications, and achievements."
+            "Paste your resume here..."
         ),
+
         label_visibility="collapsed",
     )
 
-
     uploaded_file = st.file_uploader(
-        "Upload resume PDF",
+        "Upload PDF",
+
         type=["pdf"],
-        help="Upload a text-based PDF resume.",
+
     )
 
 
-# ============================================================
-# JOB CARD
-# ============================================================
+# ------------------------------------------------------------
+# JOB DESCRIPTION
+# ------------------------------------------------------------
 
 with right_column:
 
     st.markdown(
         """
-        <div class="card">
+        <div class="input-card">
 
-            <div class="card-header">
+            <div class="section-heading">
+                Target Job
+            </div>
 
-                <div class="icon-box">
-                    🎯
-                </div>
-
-                <div>
-
-                    <div class="eyebrow">
-                        STEP 02
-                    </div>
-
-                    <div class="section-heading">
-                        Target Job
-                    </div>
-
-                    <div class="section-subheading">
-                        Paste the job description you want to analyze.
-                    </div>
-
-                </div>
-
+            <div class="section-subheading">
+                Paste the job description you want to compare against.
             </div>
 
         </div>
@@ -1102,15 +876,15 @@ with right_column:
         unsafe_allow_html=True,
     )
 
-
     job_description = st.text_area(
-        "Job description",
-        height=290,
+        "Target job description",
+
+        height=310,
+
         placeholder=(
-            "Paste the complete job description here...\n\n"
-            "Include responsibilities, required skills, "
-            "qualifications, and preferred experience."
+            "Paste the complete job description here..."
         ),
+
         label_visibility="collapsed",
     )
 
@@ -1121,14 +895,14 @@ with right_column:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-_, center_column, _ = st.columns(
+_, center, _ = st.columns(
     [1, 2, 1]
 )
 
-with center_column:
+with center:
 
     analyze_clicked = st.button(
-        "✦  Analyze My Resume",
+        "Analyze Resume",
         use_container_width=True,
     )
 
@@ -1144,7 +918,7 @@ if analyze_clicked:
     if not api_key:
 
         st.error(
-            "GROQ_API_KEY is missing. Add it in "
+            "GROQ_API_KEY is missing. Add it under "
             "Streamlit Cloud → Settings → Secrets."
         )
 
@@ -1173,9 +947,9 @@ if analyze_clicked:
             else:
 
                 st.error(
-                    "This PDF does not contain readable text. "
-                    "Please use a text-based PDF or paste your "
-                    "resume manually."
+                    "No readable text was found in this PDF. "
+                    "Please upload a text-based PDF or paste "
+                    "your resume manually."
                 )
 
                 st.stop()
@@ -1194,7 +968,7 @@ if analyze_clicked:
     if not final_resume:
 
         st.warning(
-            "Please paste your resume or upload a PDF."
+            "Please provide your resume."
         )
 
         st.stop()
@@ -1203,7 +977,7 @@ if analyze_clicked:
     if not job_description.strip():
 
         st.warning(
-            "Please paste the target job description."
+            "Please provide the target job description."
         )
 
         st.stop()
@@ -1212,8 +986,8 @@ if analyze_clicked:
     if len(final_resume) < 100:
 
         st.warning(
-            "Your resume appears to be very short. "
-            "Please provide more complete resume content."
+            "Your resume appears to be too short. "
+            "Please provide the complete resume."
         )
 
         st.stop()
@@ -1222,7 +996,7 @@ if analyze_clicked:
     if len(job_description) < 100:
 
         st.warning(
-            "The job description appears to be very short. "
+            "The job description appears to be too short. "
             "Please provide the complete job description."
         )
 
@@ -1230,30 +1004,12 @@ if analyze_clicked:
 
 
     # --------------------------------------------------------
-    # RUN AGENT
+    # RUN AI
     # --------------------------------------------------------
 
-    with st.status(
-        "Analyzing your resume...",
-        expanded=True,
-    ) as status:
-
-        st.write(
-            "Reading your resume..."
-        )
-
-        time.sleep(0.3)
-
-        st.write(
-            "Comparing experience with job requirements..."
-        )
-
-        time.sleep(0.3)
-
-        st.write(
-            "Preparing actionable recommendations..."
-        )
-
+    with st.spinner(
+        "Analyzing your resume..."
+    ):
 
         try:
 
@@ -1263,19 +1019,7 @@ if analyze_clicked:
                 api_key,
             )
 
-            status.update(
-                label="Analysis complete",
-                state="complete",
-                expanded=False,
-            )
-
         except Exception as e:
-
-            status.update(
-                label="Analysis failed",
-                state="error",
-                expanded=True,
-            )
 
             error_text = str(e).lower()
 
@@ -1286,7 +1030,7 @@ if analyze_clicked:
             ):
 
                 st.error(
-                    "Groq rate limit reached. "
+                    "The Groq rate limit was reached. "
                     "Please wait a moment and try again."
                 )
 
@@ -1298,7 +1042,7 @@ if analyze_clicked:
 
                 st.error(
                     "Groq authentication failed. "
-                    "Please check GROQ_API_KEY in Streamlit Secrets."
+                    "Check your GROQ_API_KEY."
                 )
 
 
@@ -1313,57 +1057,31 @@ if analyze_clicked:
             else:
 
                 st.error(
-                    f"Something went wrong:\n\n{e}"
+                    f"Analysis failed:\n\n{e}"
                 )
 
             st.stop()
 
 
     # ========================================================
-    # RESULTS HEADER
+    # RESULTS
     # ========================================================
 
-    match_level = result.get(
-        "match_level",
-        "Not Available",
+    st.markdown(
+        "<br><br>",
+        unsafe_allow_html=True,
     )
 
-
-    if match_level == "Strong Match":
-
-        badge_class = "match-strong"
-
-    elif match_level == "Moderate Match":
-
-        badge_class = "match-moderate"
-
-    elif match_level == "Needs Improvement":
-
-        badge_class = "match-needs"
-
-    else:
-
-        badge_class = "match-default"
-
-
     st.markdown(
-        f"""
-        <div class="result-header">
+        """
+        <div class="hero">
 
-            <div>
-
-                <div class="eyebrow">
-                    ANALYSIS COMPLETE
-                </div>
-
-                <div class="result-title">
-                    Your Resume Review
-                </div>
-
+            <div class="hero-label">
+                Analysis Complete
             </div>
 
-            <div class="{badge_class}">
-                {match_level}
+            <div class="hero-title" style="font-size: 2.4rem;">
+                Resume Review
             </div>
 
         </div>
@@ -1372,29 +1090,51 @@ if analyze_clicked:
     )
 
 
-    # ========================================================
+    # --------------------------------------------------------
+    # MATCH LEVEL
+    # --------------------------------------------------------
+
+    match_level = result.get(
+        "match_level",
+        "Not available",
+    )
+
+    st.markdown(
+        f"""
+        <div class="result-card">
+
+            <div class="result-heading">
+                Overall alignment
+            </div>
+
+            <span class="status-badge">
+                {match_level}
+            </span>
+
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+    # --------------------------------------------------------
     # SUMMARY
-    # ========================================================
+    # --------------------------------------------------------
 
     summary = result.get(
         "summary",
         "No summary was returned.",
     )
 
-
     st.markdown(
         f"""
-        <div class="summary-card">
+        <div class="result-card">
 
-            <div class="eyebrow">
-                OVERVIEW
+            <div class="result-heading">
+                Summary
             </div>
 
-            <div class="section-heading">
-                What the analysis found
-            </div>
-
-            <div class="summary-text">
+            <div class="result-text">
                 {summary}
             </div>
 
@@ -1404,9 +1144,9 @@ if analyze_clicked:
     )
 
 
-    # ========================================================
-    # STRENGTHS + ACTIONS
-    # ========================================================
+    # --------------------------------------------------------
+    # STRENGTHS + PRIORITIES
+    # --------------------------------------------------------
 
     col1, col2 = st.columns(
         2,
@@ -1414,38 +1154,24 @@ if analyze_clicked:
     )
 
 
-    # --------------------------------------------------------
-    # STRENGTHS
-    # --------------------------------------------------------
-
     with col1:
 
         st.markdown(
             """
-            <div class="card">
+            <div class="result-card">
 
-                <div class="eyebrow">
-                    YOUR ADVANTAGES
-                </div>
-
-                <div class="section-heading">
-                    ✦ Strengths
-                </div>
-
-                <div class="section-subheading">
-                    Relevant evidence already present in your resume.
+                <div class="result-heading">
+                    Strengths
                 </div>
 
             """,
             unsafe_allow_html=True,
         )
 
-
         strengths = result.get(
             "strengths",
             [],
         )
-
 
         if strengths:
 
@@ -1453,8 +1179,8 @@ if analyze_clicked:
 
                 st.markdown(
                     f"""
-                    <div class="result-item">
-                        ✓ &nbsp; {item}
+                    <div class="list-item">
+                        {item}
                     </div>
                     """,
                     unsafe_allow_html=True,
@@ -1463,9 +1189,8 @@ if analyze_clicked:
         else:
 
             st.write(
-                "No strengths were identified."
+                "No strengths identified."
             )
-
 
         st.markdown(
             "</div>",
@@ -1473,51 +1198,33 @@ if analyze_clicked:
         )
 
 
-    # --------------------------------------------------------
-    # PRIORITY ACTIONS
-    # --------------------------------------------------------
-
     with col2:
 
         st.markdown(
             """
-            <div class="card">
+            <div class="result-card">
 
-                <div class="eyebrow">
-                    NEXT STEPS
-                </div>
-
-                <div class="section-heading">
-                    🚀 Priority Actions
-                </div>
-
-                <div class="section-subheading">
-                    Changes you can focus on first.
+                <div class="result-heading">
+                    Priority Actions
                 </div>
 
             """,
             unsafe_allow_html=True,
         )
 
-
         actions = result.get(
             "priority_actions",
             [],
         )
 
-
         if actions:
 
-            for index, item in enumerate(
-                actions,
-                start=1,
-            ):
+            for item in actions:
 
                 st.markdown(
                     f"""
-                    <div class="result-item">
-                        <strong>{index:02d}</strong>
-                        &nbsp;&nbsp; {item}
+                    <div class="list-item">
+                        {item}
                     </div>
                     """,
                     unsafe_allow_html=True,
@@ -1526,9 +1233,8 @@ if analyze_clicked:
         else:
 
             st.write(
-                "No priority actions were identified."
+                "No priority actions identified."
             )
-
 
         st.markdown(
             "</div>",
@@ -1536,25 +1242,21 @@ if analyze_clicked:
         )
 
 
-    # ========================================================
-    # REQUIREMENT ANALYSIS
-    # ========================================================
+    # --------------------------------------------------------
+    # REQUIREMENTS
+    # --------------------------------------------------------
 
     st.markdown(
         """
-        <div class="card">
+        <div class="result-card">
 
-            <div class="eyebrow">
-                JOB ALIGNMENT
+            <div class="result-heading">
+                Requirement Analysis
             </div>
 
-            <div class="section-heading">
-                🔎 Requirement Analysis
-            </div>
-
-            <div class="section-subheading">
-                How your resume currently demonstrates the
-                requirements of this role.
+            <div class="result-text">
+                Review how the resume demonstrates the requirements
+                of the target role.
             </div>
 
         </div>
@@ -1575,7 +1277,7 @@ if analyze_clicked:
 
             requirement = item.get(
                 "requirement",
-                "Unknown requirement",
+                "Requirement",
             )
 
             status = item.get(
@@ -1585,77 +1287,14 @@ if analyze_clicked:
 
             evidence = item.get(
                 "evidence",
-                "",
+                "No evidence provided.",
             )
 
-
-            if status == "Demonstrated":
-
-                status_display = (
-                    '<span class="status-demo">'
-                    '✓ Demonstrated'
-                    '</span>'
-                )
-
-            elif status == "Partially Demonstrated":
-
-                status_display = (
-                    '<span class="status-partial">'
-                    '◐ Partially Demonstrated'
-                    '</span>'
-                )
-
-            else:
-
-                status_display = (
-                    '<span class="status-missing">'
-                    '× Not Demonstrated'
-                    '</span>'
-                )
-
-
             with st.expander(
-                f"{requirement}  ·  {status}"
+                f"{requirement} — {status}"
             ):
 
-                st.markdown(
-                    f"""
-                    <div style="
-                        color:#8f879f;
-                        font-size:0.75rem;
-                        text-transform:uppercase;
-                        letter-spacing:0.08em;
-                        margin-bottom:0.45rem;
-                    ">
-                        STATUS
-                    </div>
-
-                    <div style="
-                        margin-bottom:1rem;
-                    ">
-                        {status_display}
-                    </div>
-
-                    <div style="
-                        color:#8f879f;
-                        font-size:0.75rem;
-                        text-transform:uppercase;
-                        letter-spacing:0.08em;
-                        margin-bottom:0.45rem;
-                    ">
-                        EVIDENCE
-                    </div>
-
-                    <div style="
-                        color:#c8c1d3;
-                        line-height:1.6;
-                    ">
-                        {evidence}
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-
+                st.write(evidence)
 
     else:
 
@@ -1664,9 +1303,9 @@ if analyze_clicked:
         )
 
 
-    # ========================================================
+    # --------------------------------------------------------
     # MISSING / UNCLEAR
-    # ========================================================
+    # --------------------------------------------------------
 
     missing = result.get(
         "missing_or_unclear",
@@ -1678,37 +1317,26 @@ if analyze_clicked:
 
         st.markdown(
             """
-            <div class="card">
+            <div class="result-card">
 
-                <div class="eyebrow">
-                    GAPS TO REVIEW
-                </div>
-
-                <div class="section-heading">
-                    ⚠️ Missing or Unclear
-                </div>
-
-                <div class="section-subheading">
-                    Areas that are not clearly demonstrated by
-                    the provided resume.
+                <div class="result-heading">
+                    Missing or Unclear
                 </div>
 
             """,
             unsafe_allow_html=True,
         )
 
-
         for item in missing:
 
             st.markdown(
                 f"""
-                <div class="result-item">
+                <div class="list-item">
                     {item}
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
-
 
         st.markdown(
             "</div>",
@@ -1716,9 +1344,9 @@ if analyze_clicked:
         )
 
 
-    # ========================================================
-    # RESUME IMPROVEMENTS
-    # ========================================================
+    # --------------------------------------------------------
+    # IMPROVEMENTS
+    # --------------------------------------------------------
 
     improvements = result.get(
         "resume_improvements",
@@ -1730,37 +1358,26 @@ if analyze_clicked:
 
         st.markdown(
             """
-            <div class="card">
+            <div class="result-card">
 
-                <div class="eyebrow">
-                    EDIT YOUR RESUME
-                </div>
-
-                <div class="section-heading">
-                    ✍️ Recommended Improvements
-                </div>
-
-                <div class="section-subheading">
-                    Practical ways to make your resume clearer
-                    and more relevant to the target role.
+                <div class="result-heading">
+                    Resume Improvements
                 </div>
 
             """,
             unsafe_allow_html=True,
         )
 
-
         for item in improvements:
 
             st.markdown(
                 f"""
-                <div class="result-item">
-                    → &nbsp; {item}
+                <div class="list-item">
+                    {item}
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
-
 
         st.markdown(
             "</div>",
@@ -1768,9 +1385,9 @@ if analyze_clicked:
         )
 
 
-    # ========================================================
+    # --------------------------------------------------------
     # ATS KEYWORDS
-    # ========================================================
+    # --------------------------------------------------------
 
     keywords = result.get(
         "ats_keywords",
@@ -1780,59 +1397,51 @@ if analyze_clicked:
 
     if keywords:
 
-        keyword_html = ""
-
-
-        for keyword in keywords:
-
-            keyword_html += (
-                f'<span class="keyword">'
-                f'{keyword}'
-                f'</span>'
-            )
-
-
         st.markdown(
-            f"""
-            <div class="card">
+            """
+            <div class="result-card">
 
-                <div class="eyebrow">
-                    ATS & JOB LANGUAGE
+                <div class="result-heading">
+                    Relevant ATS Keywords
                 </div>
 
-                <div class="section-heading">
-                    🧠 Relevant Keywords
-                </div>
-
-                <div class="section-subheading">
-                    Terms appearing in the target role that may
-                    be useful when they truthfully describe your
-                    experience.
-                </div>
-
-                <div class="keyword-container">
-                    {keyword_html}
-                </div>
-
-            </div>
             """,
             unsafe_allow_html=True,
         )
 
+        keyword_html = ""
 
-    # ========================================================
+        for keyword in keywords:
+
+            keyword_html += (
+                f'<span class="keyword">{keyword}</span>'
+            )
+
+        st.markdown(
+            keyword_html,
+            unsafe_allow_html=True,
+        )
+
+        st.markdown(
+            "</div>",
+            unsafe_allow_html=True,
+        )
+
+
+    # --------------------------------------------------------
     # DISCLAIMER
-    # ========================================================
+    # --------------------------------------------------------
 
     disclaimer = result.get(
         "disclaimer",
-        "This review is informational and does not guarantee hiring outcomes.",
+        (
+            "This review compares the provided resume "
+            "with the provided job description and does "
+            "not guarantee hiring outcomes."
+        ),
     )
 
-
-    st.info(
-        disclaimer
-    )
+    st.info(disclaimer)
 
 
 # ============================================================
@@ -1842,9 +1451,7 @@ if analyze_clicked:
 st.markdown(
     """
     <div class="app-footer">
-        ResumeIQ&nbsp;&nbsp;·&nbsp;&nbsp;
-        AI-powered resume feedback&nbsp;&nbsp;·&nbsp;&nbsp;
-        Built with CrewAI + Groq
+        ResumeIQ · AI-assisted resume analysis
     </div>
     """,
     unsafe_allow_html=True,
