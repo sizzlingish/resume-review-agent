@@ -20,7 +20,7 @@ st.set_page_config(
 
 
 # ============================================================
-# THEME / STYLING
+# CUSTOM CSS
 # ============================================================
 
 st.markdown(
@@ -34,14 +34,20 @@ st.markdown(
     .stApp {
         background:
             radial-gradient(
-                circle at 20% 0%,
-                rgba(91, 33, 182, 0.16),
+                circle at 15% 0%,
+                rgba(91, 33, 182, 0.18),
                 transparent 30%
             ),
-            #0a0710;
+            radial-gradient(
+                circle at 90% 100%,
+                rgba(76, 29, 149, 0.10),
+                transparent 30%
+            ),
+            #09070d;
 
-        color: #f5f3fa;
+        color: #f4f1f8;
     }
+
 
     .main .block-container {
         max-width: 1180px;
@@ -49,13 +55,16 @@ st.markdown(
         padding-bottom: 4rem;
     }
 
+
     header {
         background: transparent !important;
     }
 
+
     #MainMenu {
         visibility: hidden;
     }
+
 
     footer {
         visibility: hidden;
@@ -63,58 +72,42 @@ st.markdown(
 
 
     /* ========================================================
-       SIDEBAR
+       TYPOGRAPHY
        ======================================================== */
 
-    [data-testid="stSidebar"] {
-        background: #100b18;
-        border-left: 1px solid rgba(139, 92, 246, 0.15);
-        border-right: none;
+    h1 {
+        color: #faf9ff !important;
+        font-size: 4rem !important;
+        font-weight: 800 !important;
+        letter-spacing: -0.055em !important;
+        line-height: 1 !important;
+        margin-bottom: 0.8rem !important;
     }
 
-    [data-testid="stSidebar"] > div:first-child {
-        padding: 2rem 1.3rem;
+
+    h2 {
+        color: #f4f1f8 !important;
+        font-size: 1.5rem !important;
+        font-weight: 700 !important;
+        letter-spacing: -0.02em !important;
     }
 
-    .sidebar-title {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #f5f3fa;
-        margin-bottom: 0.4rem;
+
+    h3 {
+        color: #eeeaf3 !important;
+        font-size: 1.1rem !important;
+        font-weight: 700 !important;
     }
 
-    .sidebar-description {
-        color: #8f879d;
-        font-size: 0.85rem;
-        line-height: 1.6;
-        margin-bottom: 2rem;
-    }
 
-    .sidebar-section {
-        color: #c4b5fd;
-        font-size: 0.72rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        margin-top: 1.5rem;
-        margin-bottom: 0.7rem;
-    }
-
-    .sidebar-item {
-        color: #aaa2b7;
-        font-size: 0.85rem;
-        line-height: 1.6;
-        margin-bottom: 0.7rem;
+    p {
+        color: #9a91a5;
     }
 
 
     /* ========================================================
        HERO
        ======================================================== */
-
-    .hero {
-        margin-bottom: 3rem;
-    }
 
     .hero-label {
         color: #a78bfa;
@@ -125,57 +118,83 @@ st.markdown(
         margin-bottom: 0.8rem;
     }
 
-    .hero-title {
-        color: #faf9ff;
-        font-size: clamp(2.8rem, 6vw, 4.5rem);
-        font-weight: 800;
-        letter-spacing: -0.055em;
-        line-height: 0.98;
-        margin: 0;
-    }
-
-    .hero-title span {
-        color: #a78bfa;
-    }
 
     .hero-description {
-        max-width: 700px;
-        margin-top: 1.2rem;
-        color: #958ca3;
+        max-width: 680px;
+        color: #948b9e;
         font-size: 1rem;
         line-height: 1.75;
+        margin-bottom: 2.5rem;
     }
 
 
     /* ========================================================
-       SECTION HEADINGS
+       SIDEBAR
        ======================================================== */
 
-    .section-heading {
-        color: #f3f0f8;
-        font-size: 1.2rem;
-        font-weight: 700;
-        margin-bottom: 0.35rem;
+    [data-testid="stSidebar"] {
+        background: #100b17;
+        border-left: 1px solid rgba(139, 92, 246, 0.12);
     }
 
-    .section-subheading {
-        color: #81798d;
-        font-size: 0.84rem;
-        line-height: 1.5;
-        margin-bottom: 1.1rem;
+
+    [data-testid="stSidebar"] > div:first-child {
+        padding: 2rem 1.3rem;
+    }
+
+
+    .sidebar-brand {
+        color: #f5f3f8;
+        font-size: 1.25rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        margin-bottom: 0.5rem;
+    }
+
+
+    .sidebar-text {
+        color: #82798d;
+        font-size: 0.82rem;
+        line-height: 1.65;
+    }
+
+
+    .sidebar-heading {
+        color: #a78bfa;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+        margin-top: 1.8rem;
+        margin-bottom: 0.7rem;
     }
 
 
     /* ========================================================
-       INPUT CARDS
+       SECTION CARDS
        ======================================================== */
 
     .input-card {
-        background: rgba(18, 13, 27, 0.88);
+        background: rgba(18, 13, 27, 0.82);
         border: 1px solid rgba(139, 92, 246, 0.14);
         border-radius: 18px;
-        padding: 1.35rem;
-        height: 100%;
+        padding: 1.25rem;
+        margin-bottom: 0.8rem;
+    }
+
+
+    .input-card-title {
+        color: #f0edf5;
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin-bottom: 0.3rem;
+    }
+
+
+    .input-card-description {
+        color: #82798d;
+        font-size: 0.82rem;
+        line-height: 1.5;
     }
 
 
@@ -184,17 +203,25 @@ st.markdown(
        ======================================================== */
 
     .stTextArea textarea {
-        background: #0d0914 !important;
-        color: #eeeaf5 !important;
+        background: #0d0913 !important;
+        color: #eeeaf4 !important;
 
-        border: 1px solid rgba(139, 92, 246, 0.18) !important;
+        border: 1px solid rgba(139, 92, 246, 0.16) !important;
 
         border-radius: 12px !important;
 
         font-size: 0.9rem !important;
 
         line-height: 1.6 !important;
+
+        transition: all 0.2s ease;
     }
+
+
+    .stTextArea textarea:hover {
+        border-color: rgba(139, 92, 246, 0.35) !important;
+    }
+
 
     .stTextArea textarea:focus {
         border-color: #7c3aed !important;
@@ -203,21 +230,18 @@ st.markdown(
             0 0 0 1px rgba(124, 58, 237, 0.45) !important;
     }
 
-    .stTextArea label {
-        color: #a39aaa !important;
-    }
-
 
     /* ========================================================
        FILE UPLOADER
        ======================================================== */
 
     [data-testid="stFileUploader"] {
-        background: #0d0914;
+        background: #0d0913;
         border: 1px dashed rgba(139, 92, 246, 0.28);
         border-radius: 12px;
-        padding: 0.6rem;
+        padding: 0.45rem;
     }
+
 
     [data-testid="stFileUploader"] section {
         background: transparent !important;
@@ -233,24 +257,28 @@ st.markdown(
         width: 100%;
 
         background: #7c3aed !important;
+
         color: #ffffff !important;
 
         border: none !important;
+
         border-radius: 12px !important;
 
         min-height: 48px;
 
         font-size: 0.92rem !important;
+
         font-weight: 700 !important;
 
-        transition:
-            background 0.2s ease,
-            transform 0.2s ease,
-            box-shadow 0.2s ease;
-
         box-shadow:
-            0 10px 30px rgba(124, 58, 237, 0.22);
+            0 10px 30px rgba(124, 58, 237, 0.20);
+
+        transition:
+            transform 0.2s ease,
+            background 0.2s ease,
+            box-shadow 0.2s ease;
     }
+
 
     .stButton > button:hover {
         background: #8b5cf6 !important;
@@ -267,47 +295,49 @@ st.markdown(
        ======================================================== */
 
     .result-card {
-        background: rgba(18, 13, 27, 0.9);
+        background: rgba(18, 13, 27, 0.86);
 
-        border: 1px solid rgba(139, 92, 246, 0.14);
+        border: 1px solid rgba(139, 92, 246, 0.13);
 
         border-radius: 18px;
 
-        padding: 1.35rem;
+        padding: 1.3rem;
 
         margin-bottom: 1rem;
     }
 
-    .result-heading {
-        color: #f4f1f8;
+
+    .result-title {
+        color: #f1edf5;
         font-size: 1rem;
         font-weight: 700;
-        margin-bottom: 0.8rem;
+        margin-bottom: 0.75rem;
     }
 
-    .result-text {
-        color: #aaa1b4;
-        font-size: 0.9rem;
+
+    .result-description {
+        color: #a098a8;
+        font-size: 0.88rem;
         line-height: 1.7;
     }
 
 
     /* ========================================================
-       STATUS BADGE
+       STATUS
        ======================================================== */
 
-    .status-badge {
+    .status {
         display: inline-block;
-
-        padding: 0.4rem 0.8rem;
-
-        border-radius: 999px;
 
         background: rgba(124, 58, 237, 0.12);
 
-        border: 1px solid rgba(139, 92, 246, 0.3);
+        border: 1px solid rgba(139, 92, 246, 0.28);
 
         color: #c4b5fd;
+
+        border-radius: 999px;
+
+        padding: 0.4rem 0.8rem;
 
         font-size: 0.78rem;
 
@@ -322,7 +352,7 @@ st.markdown(
     .list-item {
         background: #0e0a15;
 
-        border: 1px solid rgba(139, 92, 246, 0.09);
+        border: 1px solid rgba(139, 92, 246, 0.08);
 
         border-radius: 10px;
 
@@ -330,24 +360,24 @@ st.markdown(
 
         margin-bottom: 0.55rem;
 
-        color: #b5adbf;
+        color: #aaa1b3;
 
-        font-size: 0.87rem;
+        font-size: 0.86rem;
 
         line-height: 1.55;
     }
 
 
     /* ========================================================
-       KEYWORD TAG
+       KEYWORDS
        ======================================================== */
 
     .keyword {
         display: inline-block;
 
-        background: rgba(124, 58, 237, 0.12);
+        background: rgba(124, 58, 237, 0.11);
 
-        border: 1px solid rgba(139, 92, 246, 0.2);
+        border: 1px solid rgba(139, 92, 246, 0.22);
 
         color: #c4b5fd;
 
@@ -355,9 +385,9 @@ st.markdown(
 
         padding: 0.35rem 0.55rem;
 
-        margin: 0.2rem 0.15rem;
+        margin: 0.2rem 0.12rem;
 
-        font-size: 0.76rem;
+        font-size: 0.75rem;
     }
 
 
@@ -372,12 +402,13 @@ st.markdown(
 
         border-radius: 12px !important;
 
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.55rem;
     }
+
 
     [data-testid="stExpander"] summary {
         color: #ddd7e5 !important;
-        font-size: 0.88rem !important;
+        font-size: 0.87rem !important;
     }
 
 
@@ -394,18 +425,18 @@ st.markdown(
        FOOTER
        ======================================================== */
 
-    .app-footer {
-        border-top: 1px solid rgba(139, 92, 246, 0.1);
-
+    .footer-line {
         margin-top: 4rem;
 
         padding-top: 1.5rem;
 
+        border-top: 1px solid rgba(139, 92, 246, 0.10);
+
         text-align: center;
 
-        color: #625a6d;
+        color: #5f5768;
 
-        font-size: 0.75rem;
+        font-size: 0.74rem;
     }
 
 
@@ -419,8 +450,8 @@ st.markdown(
             padding-top: 2rem;
         }
 
-        .hero-title {
-            font-size: 3rem;
+        h1 {
+            font-size: 3rem !important;
         }
 
     }
@@ -432,82 +463,76 @@ st.markdown(
 
 
 # ============================================================
-# CONFIG
+# CONSTANTS
 # ============================================================
 
 MODEL_NAME = "openai/gpt-oss-120b"
 
 
 # ============================================================
-# RIGHT SIDEBAR
+# SIDEBAR
 # ============================================================
 
 with st.sidebar:
 
     st.markdown(
+        "ResumeIQ",
+        unsafe_allow_html=False,
+    )
+
+    st.markdown(
         """
-        <div class="sidebar-title">
-            ResumeIQ
+        <div class="sidebar-text">
+            AI-assisted resume analysis for comparing your
+            experience with a target job description.
         </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-        <div class="sidebar-description">
-            AI-assisted resume analysis designed to help you
-            understand how closely your resume aligns with a
-            target role.
+    st.markdown(
+        "How it works",
+        unsafe_allow_html=False,
+    )
+
+    st.markdown(
+        """
+        <div class="sidebar-text">
+            1. Add your resume.<br>
+            2. Add the target job description.<br>
+            3. Run the analysis.<br>
+            4. Review the recommendations.
         </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-        <div class="sidebar-section">
-            How it works
+    st.markdown(
+        "Review principles",
+        unsafe_allow_html=False,
+    )
+
+    st.markdown(
+        """
+        <div class="sidebar-text">
+            The reviewer only uses information contained
+            in the provided resume and job description.
+            It does not invent qualifications or experience.
         </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-        <div class="sidebar-item">
-            1. Add your resume
-        </div>
+    st.markdown(
+        "Technology",
+        unsafe_allow_html=False,
+    )
 
-        <div class="sidebar-item">
-            2. Add the target job description
-        </div>
-
-        <div class="sidebar-item">
-            3. Run the analysis
-        </div>
-
-        <div class="sidebar-item">
-            4. Review the recommendations
-        </div>
-
-        <div class="sidebar-section">
-            Review principles
-        </div>
-
-        <div class="sidebar-item">
-            Resume claims are evaluated only from the
-            information you provide.
-        </div>
-
-        <div class="sidebar-item">
-            The system does not invent qualifications,
-            experience, or skills.
-        </div>
-
-        <div class="sidebar-item">
-            Recommendations are informational and do not
-            guarantee hiring outcomes.
-        </div>
-
-        <div class="sidebar-section">
-            Technology
-        </div>
-
-        <div class="sidebar-item">
-            CrewAI
-        </div>
-
-        <div class="sidebar-item">
-            Groq
-        </div>
-
-        <div class="sidebar-item">
+    st.markdown(
+        """
+        <div class="sidebar-text">
+            CrewAI<br>
+            Groq<br>
             GPT-OSS-120B
         </div>
         """,
@@ -520,23 +545,40 @@ with st.sidebar:
 # ============================================================
 
 st.markdown(
+    "AI Resume Analysis",
+    unsafe_allow_html=False,
+)
+
+st.markdown(
     """
-    <div class="hero">
+    <style>
+    .hero-label-streamlit {
+        color: #a78bfa;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        margin-bottom: 0.8rem;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
-        <div class="hero-label">
-            AI Resume Analysis
-        </div>
+# Use HTML only for the small label.
+st.markdown(
+    '<div class="hero-label-streamlit">AI Resume Analysis</div>',
+    unsafe_allow_html=True,
+)
 
-        <div class="hero-title">
-            Resume<span>IQ</span>
-        </div>
+st.title("ResumeIQ")
 
-        <div class="hero-description">
-            Compare your resume with a target job description and
-            get structured, evidence-based recommendations for
-            improving your application.
-        </div>
-
+st.markdown(
+    """
+    <div class="hero-description">
+        Compare your resume with a target job description and
+        get structured, evidence-based recommendations for
+        improving your application.
     </div>
     """,
     unsafe_allow_html=True,
@@ -590,21 +632,24 @@ def extract_pdf_text(uploaded_file) -> str:
 
 
 # ============================================================
-# JSON PARSER
+# PARSE AI RESPONSE
 # ============================================================
 
 def parse_agent_output(raw_output: Any) -> dict:
 
     if raw_output is None:
+
         raise ValueError(
             "The AI returned no output."
         )
 
     if hasattr(raw_output, "raw"):
+
         raw_output = raw_output.raw
 
     text = str(raw_output).strip()
 
+    # Remove markdown code fences if the model adds them.
     if text.startswith("```"):
 
         lines = text.splitlines()
@@ -612,7 +657,10 @@ def parse_agent_output(raw_output: Any) -> dict:
         if lines:
             lines = lines[1:]
 
-        if lines and lines[-1].strip().startswith("```"):
+        if (
+            lines
+            and lines[-1].strip().startswith("```")
+        ):
             lines = lines[:-1]
 
         text = "\n".join(lines).strip()
@@ -624,6 +672,7 @@ def parse_agent_output(raw_output: Any) -> dict:
     except json.JSONDecodeError:
 
         start = text.find("{")
+
         end = text.rfind("}")
 
         if start != -1 and end != -1:
@@ -660,17 +709,16 @@ def create_resume_agent(api_key: str):
         role="Professional Resume Reviewer",
 
         goal=(
-            "Compare a candidate's resume with a target job "
+            "Compare a candidate's resume against a target job "
             "description and provide accurate, evidence-based "
             "recommendations."
         ),
 
         backstory=(
-            "You are an experienced professional resume reviewer. "
-            "You carefully compare resume evidence against job "
-            "requirements. You never fabricate qualifications, "
-            "skills, experience, education, certifications, or "
-            "achievements."
+            "You are an experienced resume reviewer. You carefully "
+            "compare resume evidence with job requirements. "
+            "You never fabricate qualifications, experience, "
+            "skills, education, certifications, or achievements."
         ),
 
         llm=llm,
@@ -696,7 +744,7 @@ def analyze_resume(
     agent = create_resume_agent(api_key)
 
     task_description = f"""
-Review the following resume against the target job description.
+Review the resume below against the target job description.
 
 RESUME:
 {resume_text}
@@ -704,20 +752,19 @@ RESUME:
 TARGET JOB DESCRIPTION:
 {job_description}
 
-Follow these rules:
+RULES:
 
 1. Never fabricate information.
-2. Only use evidence present in the resume.
-3. If a qualification or requirement is not demonstrated,
-   write exactly:
+2. Only use evidence found in the resume.
+3. If a requirement is not demonstrated, say:
    "Not demonstrated in the provided resume."
 4. Do not make hiring decisions.
 5. Do not infer sensitive personal characteristics.
-6. Provide practical resume recommendations.
-7. Focus on the relationship between the resume and job description.
+6. Provide practical and specific recommendations.
+7. Focus on the relationship between the resume and job.
 8. Return ONLY valid JSON.
 
-Return this exact structure:
+Use this exact JSON structure:
 
 {{
     "match_level": "Strong Match | Moderate Match | Needs Improvement",
@@ -733,7 +780,7 @@ Return this exact structure:
         {{
             "requirement": "Job requirement",
             "status": "Demonstrated | Partially Demonstrated | Not Demonstrated",
-            "evidence": "Resume evidence"
+            "evidence": "Evidence from resume"
         }}
     ],
 
@@ -795,13 +842,16 @@ Return this exact structure:
             last_error = e
 
             if attempt < 2:
-                time.sleep(2 ** attempt)
+
+                time.sleep(
+                    2 ** attempt
+                )
 
     raise last_error
 
 
 # ============================================================
-# INPUT AREA
+# INPUT SECTION
 # ============================================================
 
 left_column, right_column = st.columns(
@@ -810,27 +860,16 @@ left_column, right_column = st.columns(
 )
 
 
-# ------------------------------------------------------------
-# RESUME
-# ------------------------------------------------------------
+# ============================================================
+# RESUME INPUT
+# ============================================================
 
 with left_column:
 
-    st.markdown(
-        """
-        <div class="input-card">
+    st.subheader("Resume")
 
-            <div class="section-heading">
-                Resume
-            </div>
-
-            <div class="section-subheading">
-                Paste your resume or upload a PDF.
-            </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True,
+    st.caption(
+        "Paste your resume or upload a PDF."
     )
 
     resume_text = st.text_area(
@@ -847,33 +886,20 @@ with left_column:
 
     uploaded_file = st.file_uploader(
         "Upload PDF",
-
         type=["pdf"],
-
     )
 
 
-# ------------------------------------------------------------
-# JOB DESCRIPTION
-# ------------------------------------------------------------
+# ============================================================
+# JOB INPUT
+# ============================================================
 
 with right_column:
 
-    st.markdown(
-        """
-        <div class="input-card">
+    st.subheader("Target Job")
 
-            <div class="section-heading">
-                Target Job
-            </div>
-
-            <div class="section-subheading">
-                Paste the job description you want to compare against.
-            </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True,
+    st.caption(
+        "Paste the job description you want to compare against."
     )
 
     job_description = st.text_area(
@@ -890,16 +916,16 @@ with right_column:
 
 
 # ============================================================
-# ACTION
+# ANALYZE BUTTON
 # ============================================================
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-_, center, _ = st.columns(
+button_left, button_center, button_right = st.columns(
     [1, 2, 1]
 )
 
-with center:
+with button_center:
 
     analyze_clicked = st.button(
         "Analyze Resume",
@@ -908,17 +934,21 @@ with center:
 
 
 # ============================================================
-# ANALYSIS
+# RUN ANALYSIS
 # ============================================================
 
 if analyze_clicked:
+
+    # --------------------------------------------------------
+    # API KEY
+    # --------------------------------------------------------
 
     api_key = get_api_key()
 
     if not api_key:
 
         st.error(
-            "GROQ_API_KEY is missing. Add it under "
+            "GROQ_API_KEY is missing. Add it in "
             "Streamlit Cloud → Settings → Secrets."
         )
 
@@ -926,7 +956,7 @@ if analyze_clicked:
 
 
     # --------------------------------------------------------
-    # RESUME SOURCE
+    # GET RESUME
     # --------------------------------------------------------
 
     final_resume = resume_text.strip()
@@ -1004,7 +1034,7 @@ if analyze_clicked:
 
 
     # --------------------------------------------------------
-    # RUN AI
+    # RUN AGENT
     # --------------------------------------------------------
 
     with st.spinner(
@@ -1030,7 +1060,7 @@ if analyze_clicked:
             ):
 
                 st.error(
-                    "The Groq rate limit was reached. "
+                    "Groq rate limit reached. "
                     "Please wait a moment and try again."
                 )
 
@@ -1042,7 +1072,7 @@ if analyze_clicked:
 
                 st.error(
                     "Groq authentication failed. "
-                    "Check your GROQ_API_KEY."
+                    "Check your GROQ_API_KEY in Streamlit Secrets."
                 )
 
 
@@ -1067,27 +1097,9 @@ if analyze_clicked:
     # RESULTS
     # ========================================================
 
-    st.markdown(
-        "<br><br>",
-        unsafe_allow_html=True,
-    )
+    st.divider()
 
-    st.markdown(
-        """
-        <div class="hero">
-
-            <div class="hero-label">
-                Analysis Complete
-            </div>
-
-            <div class="hero-title" style="font-size: 2.4rem;">
-                Resume Review
-            </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    st.header("Resume Review")
 
 
     # --------------------------------------------------------
@@ -1103,11 +1115,11 @@ if analyze_clicked:
         f"""
         <div class="result-card">
 
-            <div class="result-heading">
-                Overall alignment
+            <div class="result-title">
+                Overall Alignment
             </div>
 
-            <span class="status-badge">
+            <span class="status">
                 {match_level}
             </span>
 
@@ -1130,11 +1142,11 @@ if analyze_clicked:
         f"""
         <div class="result-card">
 
-            <div class="result-heading">
+            <div class="result-title">
                 Summary
             </div>
 
-            <div class="result-text">
+            <div class="result-description">
                 {summary}
             </div>
 
@@ -1145,7 +1157,7 @@ if analyze_clicked:
 
 
     # --------------------------------------------------------
-    # STRENGTHS + PRIORITIES
+    # STRENGTHS + PRIORITY ACTIONS
     # --------------------------------------------------------
 
     col1, col2 = st.columns(
@@ -1160,7 +1172,7 @@ if analyze_clicked:
             """
             <div class="result-card">
 
-                <div class="result-heading">
+                <div class="result-title">
                     Strengths
                 </div>
 
@@ -1204,7 +1216,7 @@ if analyze_clicked:
             """
             <div class="result-card">
 
-                <div class="result-heading">
+                <div class="result-title">
                     Priority Actions
                 </div>
 
@@ -1243,25 +1255,15 @@ if analyze_clicked:
 
 
     # --------------------------------------------------------
-    # REQUIREMENTS
+    # REQUIREMENT ANALYSIS
     # --------------------------------------------------------
 
-    st.markdown(
-        """
-        <div class="result-card">
+    st.subheader(
+        "Requirement Analysis"
+    )
 
-            <div class="result-heading">
-                Requirement Analysis
-            </div>
-
-            <div class="result-text">
-                Review how the resume demonstrates the requirements
-                of the target role.
-            </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True,
+    st.caption(
+        "How the resume demonstrates the requirements of the target role."
     )
 
 
@@ -1315,16 +1317,8 @@ if analyze_clicked:
 
     if missing:
 
-        st.markdown(
-            """
-            <div class="result-card">
-
-                <div class="result-heading">
-                    Missing or Unclear
-                </div>
-
-            """,
-            unsafe_allow_html=True,
+        st.subheader(
+            "Missing or Unclear"
         )
 
         for item in missing:
@@ -1338,14 +1332,9 @@ if analyze_clicked:
                 unsafe_allow_html=True,
             )
 
-        st.markdown(
-            "</div>",
-            unsafe_allow_html=True,
-        )
-
 
     # --------------------------------------------------------
-    # IMPROVEMENTS
+    # RESUME IMPROVEMENTS
     # --------------------------------------------------------
 
     improvements = result.get(
@@ -1356,16 +1345,8 @@ if analyze_clicked:
 
     if improvements:
 
-        st.markdown(
-            """
-            <div class="result-card">
-
-                <div class="result-heading">
-                    Resume Improvements
-                </div>
-
-            """,
-            unsafe_allow_html=True,
+        st.subheader(
+            "Resume Improvements"
         )
 
         for item in improvements:
@@ -1378,11 +1359,6 @@ if analyze_clicked:
                 """,
                 unsafe_allow_html=True,
             )
-
-        st.markdown(
-            "</div>",
-            unsafe_allow_html=True,
-        )
 
 
     # --------------------------------------------------------
@@ -1397,16 +1373,8 @@ if analyze_clicked:
 
     if keywords:
 
-        st.markdown(
-            """
-            <div class="result-card">
-
-                <div class="result-heading">
-                    Relevant ATS Keywords
-                </div>
-
-            """,
-            unsafe_allow_html=True,
+        st.subheader(
+            "Relevant ATS Keywords"
         )
 
         keyword_html = ""
@@ -1419,11 +1387,6 @@ if analyze_clicked:
 
         st.markdown(
             keyword_html,
-            unsafe_allow_html=True,
-        )
-
-        st.markdown(
-            "</div>",
             unsafe_allow_html=True,
         )
 
@@ -1449,10 +1412,6 @@ if analyze_clicked:
 # ============================================================
 
 st.markdown(
-    """
-    <div class="app-footer">
-        ResumeIQ · AI-assisted resume analysis
-    </div>
-    """,
+    "<div class='footer-line'>ResumeIQ · AI-assisted resume analysis</div>",
     unsafe_allow_html=True,
 )
