@@ -8,83 +8,342 @@ from crewai import Agent, Crew, Process, Task, LLM
 
 
 # ============================================================
-# CONFIGURATION
+# PAGE CONFIG
+# ============================================================
+
+st.set_page_config(
+    page_title="ResumeIQ — AI Resume Review",
+    page_icon="✦",
+    layout="wide",
+    initial_sidebar_state="collapsed",
+)
+
+
+# ============================================================
+# CUSTOM STYLING
+# ============================================================
+
+st.markdown(
+    """
+    <style>
+
+    /* ---------- GLOBAL ---------- */
+
+    .stApp {
+        background:
+            radial-gradient(
+                circle at 10% 0%,
+                rgba(124, 58, 237, 0.18),
+                transparent 32%
+            ),
+            radial-gradient(
+                circle at 90% 10%,
+                rgba(168, 85, 247, 0.12),
+                transparent 28%
+            ),
+            #090611;
+        color: #f5f3ff;
+    }
+
+    .main .block-container {
+        max-width: 1200px;
+        padding-top: 2.5rem;
+        padding-bottom: 4rem;
+    }
+
+    /* ---------- HIDE STREAMLIT DEFAULTS ---------- */
+
+    #MainMenu {
+        visibility: hidden;
+    }
+
+    footer {
+        visibility: hidden;
+    }
+
+    header {
+        background: transparent !important;
+    }
+
+    /* ---------- TYPOGRAPHY ---------- */
+
+    h1, h2, h3 {
+        color: #f8f7ff !important;
+        letter-spacing: -0.025em;
+    }
+
+    p, label, .stMarkdown {
+        color: #c9c4d8;
+    }
+
+    /* ---------- HERO ---------- */
+
+    .hero {
+        text-align: center;
+        padding: 2.5rem 1rem 2rem 1rem;
+    }
+
+    .hero-badge {
+        display: inline-block;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        background: rgba(124, 58, 237, 0.14);
+        border: 1px solid rgba(168, 85, 247, 0.35);
+        color: #c4b5fd;
+        font-size: 0.82rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .hero-title {
+        font-size: clamp(2.4rem, 5vw, 4.4rem);
+        font-weight: 800;
+        line-height: 1.05;
+        margin: 0;
+        background: linear-gradient(
+            90deg,
+            #ffffff,
+            #d8b4fe,
+            #a78bfa
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+        max-width: 700px;
+        margin: 1rem auto 0 auto;
+        font-size: 1.05rem;
+        line-height: 1.7;
+        color: #aaa3bd;
+    }
+
+    /* ---------- CARDS ---------- */
+
+    .glass-card {
+        background: rgba(22, 16, 36, 0.78);
+        border: 1px solid rgba(167, 139, 250, 0.16);
+        border-radius: 20px;
+        padding: 1.4rem;
+        box-shadow:
+            0 18px 50px rgba(0, 0, 0, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.025);
+        margin-bottom: 1rem;
+    }
+
+    .section-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #f5f3ff;
+        margin-bottom: 0.2rem;
+    }
+
+    .section-description {
+        font-size: 0.88rem;
+        color: #928ba5;
+        margin-bottom: 1rem;
+    }
+
+    /* ---------- INPUTS ---------- */
+
+    .stTextArea textarea,
+    .stTextInput input {
+        background: rgba(14, 10, 24, 0.85) !important;
+        color: #f5f3ff !important;
+        border: 1px solid rgba(167, 139, 250, 0.18) !important;
+        border-radius: 14px !important;
+    }
+
+    .stTextArea textarea:focus,
+    .stTextInput input:focus {
+        border-color: #8b5cf6 !important;
+        box-shadow: 0 0 0 1px #8b5cf6 !important;
+    }
+
+    /* ---------- FILE UPLOADER ---------- */
+
+    [data-testid="stFileUploader"] {
+        background: rgba(14, 10, 24, 0.65);
+        border: 1px dashed rgba(167, 139, 250, 0.35);
+        border-radius: 14px;
+        padding: 0.5rem;
+    }
+
+    /* ---------- BUTTON ---------- */
+
+    .stButton > button {
+        width: 100%;
+        border: none !important;
+        border-radius: 14px !important;
+        padding: 0.8rem 1.2rem !important;
+        font-weight: 700 !important;
+        font-size: 1rem !important;
+        color: white !important;
+        background: linear-gradient(
+            135deg,
+            #7c3aed,
+            #9333ea
+        ) !important;
+        box-shadow:
+            0 10px 30px rgba(124, 58, 237, 0.28);
+        transition: all 0.2s ease;
+    }
+
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow:
+            0 14px 35px rgba(124, 58, 237, 0.4);
+    }
+
+    /* ---------- RESULT HEADER ---------- */
+
+    .result-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin: 2rem 0 1.2rem 0;
+    }
+
+    .result-title {
+        font-size: 1.8rem;
+        font-weight: 750;
+        color: #f8f7ff;
+    }
+
+    .match-badge {
+        display: inline-block;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        background: rgba(124, 58, 237, 0.16);
+        border: 1px solid rgba(167, 139, 250, 0.3);
+        color: #c4b5fd;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
+    /* ---------- METRIC CARDS ---------- */
+
+    .metric-card {
+        background: rgba(22, 16, 36, 0.78);
+        border: 1px solid rgba(167, 139, 250, 0.14);
+        border-radius: 18px;
+        padding: 1.2rem;
+        min-height: 120px;
+    }
+
+    .metric-label {
+        font-size: 0.8rem;
+        color: #8f879f;
+        margin-bottom: 0.5rem;
+    }
+
+    .metric-value {
+        font-size: 1.25rem;
+        font-weight: 750;
+        color: #eee9ff;
+    }
+
+    /* ---------- LIST ITEMS ---------- */
+
+    .custom-item {
+        background: rgba(14, 10, 24, 0.55);
+        border: 1px solid rgba(167, 139, 250, 0.1);
+        border-radius: 12px;
+        padding: 0.75rem 0.9rem;
+        margin: 0.45rem 0;
+        color: #d6d0e2;
+        line-height: 1.5;
+    }
+
+    /* ---------- FOOTER ---------- */
+
+    .footer {
+        text-align: center;
+        margin-top: 3rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(167, 139, 250, 0.1);
+        color: #696276;
+        font-size: 0.8rem;
+    }
+
+    /* ---------- MOBILE ---------- */
+
+    @media (max-width: 768px) {
+        .main .block-container {
+            padding: 1.2rem;
+        }
+
+        .hero {
+            padding-top: 1rem;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+        }
+
+        .result-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+
+# ============================================================
+# CONFIG
 # ============================================================
 
 MODEL_NAME = "openai/gpt-oss-120b"
 
 
-st.set_page_config(
-    page_title="AI Resume Review Agent",
-    page_icon="📄",
-    layout="wide",
-)
-
-
 # ============================================================
-# HELPER FUNCTIONS
+# HELPERS
 # ============================================================
 
-def get_api_key() -> str | None:
-    """Get the Groq API key from Streamlit Secrets."""
-
+def get_api_key() -> str:
     try:
-        key = st.secrets["GROQ_API_KEY"]
-        return str(key).strip()
-
+        return st.secrets["GROQ_API_KEY"]
     except Exception:
-        return None
+        return ""
 
 
-def extract_pdf_text(uploaded_file) -> tuple[str | None, str | None]:
-    """Extract readable text from an uploaded PDF."""
-
+def extract_pdf_text(uploaded_file) -> str:
     try:
         reader = PdfReader(uploaded_file)
 
-        if len(reader.pages) == 0:
-            return None, "The PDF does not contain any pages."
-
         pages = []
 
-        for page_number, page in enumerate(reader.pages, start=1):
-
+        for page in reader.pages:
             try:
                 text = page.extract_text()
 
                 if text:
                     pages.append(text)
+            except Exception:
+                continue
 
-            except Exception as error:
-                return (
-                    None,
-                    f"Could not read page {page_number}: {error}",
-                )
+        return "\n\n".join(pages).strip()
 
-        extracted_text = "\n\n".join(pages).strip()
-
-        if not extracted_text:
-            return (
-                None,
-                "No readable text was found in this PDF. "
-                "It may be a scanned/image-based PDF. "
-                "Please paste the resume text instead.",
-            )
-
-        return extracted_text, None
-
-    except Exception as error:
-        return None, f"Could not read the PDF: {error}"
+    except Exception as e:
+        raise ValueError(f"Could not read the PDF: {e}")
 
 
-def parse_agent_output(raw_output: str) -> dict[str, Any]:
-    """Convert the agent response into a Python dictionary."""
+def parse_agent_output(raw_output: Any) -> dict:
+    if raw_output is None:
+        raise ValueError("The agent returned no output.")
 
-    text = raw_output.strip()
+    if hasattr(raw_output, "raw"):
+        raw_output = raw_output.raw
 
-    # Remove Markdown code fences if the model adds them.
+    text = str(raw_output).strip()
+
+    # Remove markdown code fences if the model adds them
     if text.startswith("```"):
-
         lines = text.splitlines()
 
         if lines:
@@ -95,23 +354,27 @@ def parse_agent_output(raw_output: str) -> dict[str, Any]:
 
         text = "\n".join(lines).strip()
 
-    # Find JSON object if there is extra text.
-    start = text.find("{")
-    end = text.rfind("}")
+    try:
+        return json.loads(text)
 
-    if start == -1 or end == -1:
-        raise ValueError("The AI did not return valid JSON.")
+    except json.JSONDecodeError:
+        start = text.find("{")
+        end = text.rfind("}")
 
-    text = text[start:end + 1]
+        if start != -1 and end != -1 and end > start:
+            try:
+                return json.loads(text[start:end + 1])
+            except Exception:
+                pass
 
-    return json.loads(text)
+    raise ValueError("The AI returned an invalid response format.")
 
 
 # ============================================================
 # CREWAI AGENT
 # ============================================================
 
-def create_resume_agent(api_key: str) -> Agent:
+def create_resume_agent(api_key: str):
 
     llm = LLM(
         model=f"groq/{MODEL_NAME}",
@@ -121,162 +384,93 @@ def create_resume_agent(api_key: str) -> Agent:
     )
 
     agent = Agent(
-        role="Resume Review Specialist",
-
+        role="Professional Resume Reviewer",
         goal=(
-            "Compare a candidate's resume with a target job "
-            "description and provide an accurate, evidence-based "
-            "review with actionable improvement suggestions."
+            "Analyze a candidate's resume against a target job description "
+            "and provide accurate, evidence-based, actionable feedback."
         ),
-
         backstory=(
-            "You are a careful professional resume reviewer. "
-            "You analyze only the information provided in the "
-            "resume and job description. You never invent skills, "
-            "experience, qualifications, certifications, education, "
-            "achievements, technologies, or years of experience."
+            "You are an experienced technical recruiter and resume reviewer. "
+            "You carefully compare resumes with job requirements. "
+            "You never invent qualifications, experience, skills, education, "
+            "certifications, or achievements that are not supported by the resume."
         ),
-
         llm=llm,
-
         verbose=False,
-
         allow_delegation=False,
-
-        max_iter=3,
     )
 
     return agent
 
 
 # ============================================================
-# RUN RESUME REVIEW
+# ANALYSIS
 # ============================================================
 
-def review_resume(
-    resume_text: str,
-    job_description: str,
-    api_key: str,
-) -> dict[str, Any]:
+def analyze_resume(resume_text: str, job_description: str, api_key: str):
 
     agent = create_resume_agent(api_key)
 
-    task = Task(
-        description=f"""
-You are reviewing a candidate's resume against a target job description.
+    task_description = f"""
+You are reviewing a resume against a target job description.
 
-================ RESUME ================
-
+RESUME:
 {resume_text}
 
-================ JOB DESCRIPTION ================
-
+TARGET JOB DESCRIPTION:
 {job_description}
 
-================ RULES ================
+Analyze the resume carefully.
 
-Follow these rules strictly:
-
-1. Use ONLY information contained in the supplied resume
-   and job description.
-
-2. NEVER invent or assume:
-   - skills
-   - work experience
-   - years of experience
-   - degrees
-   - certifications
-   - job titles
-   - achievements
-   - technologies
-   - responsibilities
-   - projects
-   - metrics
-
-3. If a requirement is not mentioned in the resume, say:
-
+IMPORTANT RULES:
+1. Never fabricate information.
+2. Never assume a skill exists unless the resume supports it.
+3. If something is not present or cannot be verified, say:
    "Not demonstrated in the provided resume."
+4. Do not make hiring decisions.
+5. Do not infer sensitive personal characteristics.
+6. Focus only on evidence from the resume and requirements from the job description.
+7. Give practical recommendations that the candidate can actually use.
+8. Keep the response concise but useful.
 
-4. Do NOT say that the candidate definitely lacks a skill
-   just because it is not mentioned.
-
-5. Distinguish between:
-   - Demonstrated
-   - Partially demonstrated
-   - Not demonstrated
-
-6. Recommendations should be actionable.
-
-7. Never recommend that the candidate falsely add a skill,
-   qualification, experience, certification, or achievement.
-
-8. If suggesting a keyword, say that it should only be added
-   if it genuinely describes the candidate's experience.
-
-9. Do not make a hiring decision.
-
-10. Do not infer sensitive personal characteristics.
-
-================ REQUIRED OUTPUT ================
-
-Return ONLY valid JSON.
-
-Use exactly this structure:
+Return ONLY valid JSON using exactly this structure:
 
 {{
-    "overall_summary": "Short factual summary.",
-
-    "match_level": "Strong / Moderate / Limited / Insufficient evidence",
-
-    "key_strengths": [
-        {{
-            "requirement": "Job requirement",
-            "evidence": "Evidence from the resume"
-        }}
+    "match_level": "Strong Match | Moderate Match | Needs Improvement",
+    "summary": "Short overall comparison.",
+    "strengths": [
+        "Strength 1",
+        "Strength 2"
     ],
-
     "requirement_analysis": [
         {{
-            "requirement": "Requirement from job description",
-            "status": "Demonstrated / Partially demonstrated / Not demonstrated",
-            "resume_evidence": "Evidence from resume or Not demonstrated in the provided resume.",
-            "recommendation": "Actionable recommendation"
+            "requirement": "Job requirement",
+            "status": "Demonstrated | Partially Demonstrated | Not Demonstrated",
+            "evidence": "Evidence from resume or Not demonstrated in the provided resume."
         }}
     ],
-
-    "missing_or_unclear_information": [
-        "Requirement that is missing or unclear"
+    "missing_or_unclear": [
+        "Missing or unclear item"
     ],
-
     "resume_improvements": [
-        {{
-            "area": "Summary / Experience / Skills / Projects / Education / Formatting",
-            "recommendation": "Specific improvement",
-            "example": "Example wording that does not invent information"
-        }}
+        "Specific improvement"
     ],
-
-    "ats_keywords_to_consider": [
-        "Relevant keyword from job description"
+    "ats_keywords": [
+        "keyword 1",
+        "keyword 2"
     ],
-
     "priority_actions": [
-        "Most important improvement",
-        "Second important improvement",
-        "Third important improvement"
+        "Highest priority action",
+        "Second priority action",
+        "Third priority action"
     ],
-
-    "important_disclaimer": "This review is based only on the supplied resume and job description. Not mentioned means not demonstrated in the supplied resume; it does not prove that the candidate lacks the qualification."
+    "disclaimer": "This review compares the provided resume with the provided job description and does not guarantee hiring outcomes."
 }}
+"""
 
-Return no Markdown.
-Return no explanation outside the JSON.
-""",
-
-        expected_output=(
-            "A valid JSON object containing the requested resume review."
-        ),
-
+    task = Task(
+        description=task_description,
+        expected_output="Valid JSON matching the requested structure.",
         agent=agent,
     )
 
@@ -287,408 +481,406 @@ Return no explanation outside the JSON.
         verbose=False,
     )
 
-    # Retry a few times for temporary API problems.
+    # Retry a few times for temporary API failures
     last_error = None
 
     for attempt in range(3):
 
         try:
-
             result = crew.kickoff()
 
-            return parse_agent_output(
-                str(result.raw)
-            )
+            return parse_agent_output(result)
 
-        except Exception as error:
+        except Exception as e:
 
-            last_error = error
+            last_error = e
 
             if attempt < 2:
                 time.sleep(2 ** attempt)
 
-    raise RuntimeError(str(last_error))
+    raise last_error
 
 
 # ============================================================
-# USER INTERFACE
+# HERO
 # ============================================================
 
-st.title("📄 AI Resume Review Agent")
+st.markdown(
+    """
+    <div class="hero">
 
-st.write(
-    """
-    Upload or paste a resume and provide a target job description.
-    The AI agent will compare them and provide evidence-based,
-    actionable recommendations.
-    """
+        <div class="hero-badge">
+            ✦ AI-POWERED RESUME ANALYZER
+        </div>
+
+        <div class="hero-title">
+            ResumeIQ
+        </div>
+
+        <div class="hero-subtitle">
+            Compare your resume with any job description and discover
+            exactly what to improve — with clear, evidence-based AI feedback.
+        </div>
+
+    </div>
+    """,
+    unsafe_allow_html=True,
 )
 
-st.info(
-    "The agent does not invent qualifications. "
-    "If something is not mentioned in the resume, it is reported "
-    "as not demonstrated rather than assumed."
-)
-
 
 # ============================================================
-# SIDEBAR
+# INPUT SECTION
 # ============================================================
 
-with st.sidebar:
+left, right = st.columns(2, gap="large")
 
-    st.header("About this app")
 
-    st.write(
+with left:
+
+    st.markdown(
         """
-        This is a single-agent CrewAI application.
+        <div class="glass-card">
 
-        **Streamlit**
-        creates the interface.
+            <div class="section-title">
+                📄 Your Resume
+            </div>
 
-        **CrewAI**
-        manages the AI agent.
+            <div class="section-description">
+                Paste your resume or upload a PDF.
+            </div>
 
-        **Groq**
-        provides the language model.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-        **GPT-OSS 120B**
-        performs the resume analysis.
+    resume_input = st.text_area(
+        "Paste resume",
+        height=300,
+        placeholder=(
+            "Paste your resume text here...\n\n"
+            "Example:\n"
+            "Software Engineer with 2 years of experience..."
+        ),
+        label_visibility="collapsed",
+    )
+
+    uploaded_file = st.file_uploader(
+        "Or upload your resume as PDF",
+        type=["pdf"],
+    )
+
+
+with right:
+
+    st.markdown(
         """
+        <div class="glass-card">
+
+            <div class="section-title">
+                🎯 Target Job
+            </div>
+
+            <div class="section-description">
+                Paste the job description you want to compare against.
+            </div>
+
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
-
-    st.divider()
-
-    st.caption(
-        f"Model: {MODEL_NAME}"
-    )
-
-
-# ============================================================
-# INPUTS
-# ============================================================
-
-resume_column, job_column = st.columns(2)
-
-
-# ------------------------------------------------------------
-# RESUME
-# ------------------------------------------------------------
-
-with resume_column:
-
-    st.subheader("1️⃣ Resume")
-
-    input_method = st.radio(
-        "Choose how to provide the resume:",
-        [
-            "Paste resume text",
-            "Upload PDF",
-        ],
-        horizontal=True,
-    )
-
-    resume_text = ""
-
-    if input_method == "Paste resume text":
-
-        resume_text = st.text_area(
-            "Resume text",
-            height=400,
-            placeholder=(
-                "Paste the candidate's complete resume here..."
-            ),
-        )
-
-    else:
-
-        uploaded_file = st.file_uploader(
-            "Upload resume PDF",
-            type=["pdf"],
-        )
-
-        if uploaded_file is not None:
-
-            with st.spinner("Reading PDF..."):
-
-                extracted_text, error = extract_pdf_text(
-                    uploaded_file
-                )
-
-            if error:
-
-                st.error(error)
-
-            else:
-
-                resume_text = extracted_text
-
-                st.success(
-                    "PDF text extracted successfully."
-                )
-
-                with st.expander(
-                    "Preview extracted resume"
-                ):
-
-                    st.text(
-                        resume_text
-                    )
-
-
-# ------------------------------------------------------------
-# JOB DESCRIPTION
-# ------------------------------------------------------------
-
-with job_column:
-
-    st.subheader("2️⃣ Target Job")
 
     job_description = st.text_area(
         "Job description",
-        height=400,
+        height=300,
         placeholder=(
-            "Paste the complete target job description here..."
+            "Paste the target job description here...\n\n"
+            "Example:\n"
+            "We are looking for a Python developer..."
         ),
+        label_visibility="collapsed",
     )
+
+
+st.markdown("<br>", unsafe_allow_html=True)
 
 
 # ============================================================
 # REVIEW BUTTON
 # ============================================================
 
-st.divider()
-
-review_button = st.button(
-    "🔍 Review Resume",
-    type="primary",
+review_clicked = st.button(
+    "✦ Analyze My Resume",
     use_container_width=True,
 )
 
 
 # ============================================================
-# PROCESS REQUEST
+# PROCESS
 # ============================================================
 
-if review_button:
-
-    # --------------------------------------------------------
-    # API KEY
-    # --------------------------------------------------------
+if review_clicked:
 
     api_key = get_api_key()
 
     if not api_key:
-
         st.error(
-            "GROQ_API_KEY is missing. "
-            "Add it in Streamlit Cloud → Settings → Secrets."
+            "GROQ_API_KEY is missing. Add it in Streamlit Cloud → "
+            "Settings → Secrets."
         )
-
         st.stop()
 
-    # --------------------------------------------------------
-    # RESUME VALIDATION
-    # --------------------------------------------------------
+    # Get resume from PDF if supplied
+    final_resume = resume_input.strip()
 
-    resume_text = resume_text.strip()
+    if uploaded_file is not None:
 
-    if not resume_text:
+        try:
+            pdf_text = extract_pdf_text(uploaded_file)
 
-        st.warning(
-            "Please provide a resume by pasting the text "
-            "or uploading a PDF."
-        )
+            if pdf_text:
+                final_resume = pdf_text
 
+            else:
+                st.error(
+                    "The PDF does not contain readable text. "
+                    "If it is a scanned resume, please paste the text instead."
+                )
+                st.stop()
+
+        except Exception as e:
+
+            st.error(str(e))
+            st.stop()
+
+    if not final_resume:
+
+        st.warning("Please provide your resume first.")
         st.stop()
 
-    # --------------------------------------------------------
-    # JOB DESCRIPTION VALIDATION
-    # --------------------------------------------------------
+    if not job_description.strip():
 
-    job_description = job_description.strip()
-
-    if not job_description:
-
-        st.warning(
-            "Please paste the target job description."
-        )
-
+        st.warning("Please provide the target job description.")
         st.stop()
 
-    # --------------------------------------------------------
-    # BASIC INPUT CHECK
-    # --------------------------------------------------------
-
-    if len(resume_text) < 100:
+    if len(final_resume) < 100:
 
         st.warning(
-            "The resume appears to contain very little text. "
-            "Please provide the complete resume."
+            "Your resume appears to be very short. "
+            "Please provide more complete resume content."
         )
-
         st.stop()
 
     if len(job_description) < 100:
 
         st.warning(
-            "The job description appears to contain very little text. "
+            "The job description appears to be very short. "
             "Please provide the complete job description."
         )
-
         st.stop()
 
-    # --------------------------------------------------------
-    # RUN AGENT
-    # --------------------------------------------------------
+    # ---------- RUN AGENT ----------
 
-    with st.spinner(
-        "🤖 Resume Review Agent is analyzing the resume..."
-    ):
+    with st.spinner("Analyzing your resume against the job description..."):
 
         try:
 
-            review = review_resume(
-                resume_text=resume_text,
-                job_description=job_description,
-                api_key=api_key,
+            result = analyze_resume(
+                final_resume,
+                job_description,
+                api_key,
             )
 
-        except Exception as error:
+        except Exception as e:
 
-            error_message = str(error).lower()
+            error_text = str(e).lower()
 
-            if (
-                "429" in error_message
-                or "rate limit" in error_message
-                or "too many requests" in error_message
-            ):
+            if "429" in error_text or "rate limit" in error_text:
 
                 st.error(
-                    "Groq rate limit reached. "
-                    "Please wait a little and try again."
+                    "Groq rate limit reached. Please wait a moment and try again."
                 )
 
-            elif (
-                "401" in error_message
-                or "authentication" in error_message
-                or "api key" in error_message
-            ):
+            elif "401" in error_text or "authentication" in error_text:
 
                 st.error(
-                    "Groq authentication failed. "
-                    "Please check your GROQ_API_KEY in "
-                    "Streamlit Secrets."
+                    "Groq authentication failed. Check your GROQ_API_KEY "
+                    "in Streamlit Secrets."
                 )
 
-            elif (
-                "403" in error_message
-                or "permission" in error_message
-            ):
+            elif "403" in error_text:
 
                 st.error(
-                    "Groq rejected the request because the "
-                    "model is not permitted for this API key/project."
-                )
-
-            elif (
-                "400" in error_message
-                or "bad request" in error_message
-            ):
-
-                st.error(
-                    "Groq rejected the request. "
-                    "Please check the model configuration."
+                    "Groq rejected the request. Check your API key and "
+                    "model access."
                 )
 
             else:
 
                 st.error(
-                    "The resume review could not be completed."
+                    f"Something went wrong while analyzing the resume:\n\n{e}"
                 )
-
-                with st.expander(
-                    "Technical error"
-                ):
-
-                    st.code(
-                        str(error)
-                    )
 
             st.stop()
 
     # ========================================================
-    # DISPLAY RESULTS
+    # RESULTS
     # ========================================================
 
-    st.success(
-        "Resume review completed."
+    st.markdown(
+        """
+        <div class="result-header">
+
+            <div class="result-title">
+                ✦ Resume Analysis
+            </div>
+
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
-    st.divider()
-
-    # --------------------------------------------------------
-    # MATCH LEVEL
-    # --------------------------------------------------------
-
-    st.subheader("📊 Overall Assessment")
-
-    match_level = review.get(
+    match_level = result.get(
         "match_level",
         "Not available",
     )
 
-    st.metric(
-        "Match level",
-        match_level,
+    st.markdown(
+        f"""
+        <div class="match-badge">
+            {match_level}
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
-    st.write(
-        review.get(
-            "overall_summary",
-            "No summary available.",
+    st.markdown("<br>", unsafe_allow_html=True)
+
+
+    # ========================================================
+    # SUMMARY
+    # ========================================================
+
+    summary = result.get("summary", "")
+
+    st.markdown(
+        """
+        <div class="glass-card">
+
+            <div class="section-title">
+                ✨ Overall Summary
+            </div>
+
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(summary)
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+
+    # ========================================================
+    # STRENGTHS + PRIORITY ACTIONS
+    # ========================================================
+
+    col1, col2 = st.columns(2, gap="large")
+
+
+    with col1:
+
+        st.markdown(
+            """
+            <div class="glass-card">
+
+                <div class="section-title">
+                    💜 Your Strengths
+                </div>
+
+            """,
+            unsafe_allow_html=True,
         )
-    )
 
-    # --------------------------------------------------------
-    # STRENGTHS
-    # --------------------------------------------------------
+        strengths = result.get("strengths", [])
 
-    st.subheader("💪 Key Strengths")
+        if strengths:
 
-    strengths = review.get(
-        "key_strengths",
-        [],
-    )
+            for item in strengths:
 
-    if strengths:
-
-        for strength in strengths:
-
-            st.markdown(
-                f"**{strength.get('requirement', 'Requirement')}**"
-            )
-
-            st.write(
-                strength.get(
-                    "evidence",
-                    "No evidence provided.",
+                st.markdown(
+                    f"""
+                    <div class="custom-item">
+                        ✓ {item}
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
                 )
-            )
 
-    else:
+        else:
 
-        st.info(
-            "No specific strengths were identified."
+            st.markdown("No strengths identified.")
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
+
+    with col2:
+
+        st.markdown(
+            """
+            <div class="glass-card">
+
+                <div class="section-title">
+                    🚀 Priority Actions
+                </div>
+
+            """,
+            unsafe_allow_html=True,
         )
 
-    # --------------------------------------------------------
+        actions = result.get("priority_actions", [])
+
+        if actions:
+
+            for index, item in enumerate(actions, start=1):
+
+                st.markdown(
+                    f"""
+                    <div class="custom-item">
+                        <strong>{index}.</strong> {item}
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+        else:
+
+            st.markdown("No priority actions identified.")
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
+
+    # ========================================================
     # REQUIREMENT ANALYSIS
-    # --------------------------------------------------------
+    # ========================================================
 
-    st.subheader("📋 Requirement Analysis")
+    st.markdown(
+        """
+        <div class="glass-card">
 
-    requirements = review.get(
+            <div class="section-title">
+                🔍 Job Requirement Analysis
+            </div>
+
+            <div class="section-description">
+                How your resume demonstrates the requirements of the role.
+            </div>
+
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    requirements = result.get(
         "requirement_analysis",
         [],
     )
@@ -699,7 +891,7 @@ if review_button:
 
             requirement = item.get(
                 "requirement",
-                "Requirement",
+                "Unknown requirement",
             )
 
             status = item.get(
@@ -707,179 +899,158 @@ if review_button:
                 "Unknown",
             )
 
+            evidence = item.get(
+                "evidence",
+                "",
+            )
+
             with st.expander(
-                f"{status} — {requirement}"
+                f"{requirement} — {status}"
             ):
 
-                st.markdown(
-                    "**Resume evidence**"
-                )
-
-                st.write(
-                    item.get(
-                        "resume_evidence",
-                        "No evidence provided.",
-                    )
-                )
-
-                st.markdown(
-                    "**Recommendation**"
-                )
-
-                st.write(
-                    item.get(
-                        "recommendation",
-                        "No recommendation provided.",
-                    )
-                )
+                st.write(evidence)
 
     else:
 
-        st.info(
-            "No requirement analysis was returned."
-        )
+        st.info("No requirement analysis was returned.")
 
-    # --------------------------------------------------------
-    # MISSING INFORMATION
-    # --------------------------------------------------------
 
-    st.subheader(
-        "❓ Missing or Unclear Information"
-    )
+    # ========================================================
+    # MISSING / UNCLEAR
+    # ========================================================
 
-    missing = review.get(
-        "missing_or_unclear_information",
+    missing = result.get(
+        "missing_or_unclear",
         [],
     )
 
     if missing:
 
+        st.markdown(
+            """
+            <div class="glass-card">
+
+                <div class="section-title">
+                    ⚠️ Missing or Unclear
+                </div>
+
+            """,
+            unsafe_allow_html=True,
+        )
+
         for item in missing:
 
             st.markdown(
-                f"- {item}"
+                f"""
+                <div class="custom-item">
+                    {item}
+                </div>
+                """,
+                unsafe_allow_html=True,
             )
 
-    else:
+        st.markdown("</div>", unsafe_allow_html=True)
 
-        st.success(
-            "No major missing or unclear requirements identified."
-        )
 
-    # --------------------------------------------------------
-    # IMPROVEMENTS
-    # --------------------------------------------------------
+    # ========================================================
+    # RESUME IMPROVEMENTS
+    # ========================================================
 
-    st.subheader(
-        "✏️ Resume Improvement Recommendations"
-    )
-
-    improvements = review.get(
+    improvements = result.get(
         "resume_improvements",
         [],
     )
 
     if improvements:
 
-        for improvement in improvements:
+        st.markdown(
+            """
+            <div class="glass-card">
 
-            st.markdown(
-                f"### {improvement.get('area', 'Resume')}"
-            )
+                <div class="section-title">
+                    ✍️ Resume Improvements
+                </div>
 
-            st.write(
-                improvement.get(
-                    "recommendation",
-                    "",
-                )
-            )
-
-            example = improvement.get(
-                "example",
-                "",
-            )
-
-            if example:
-
-                st.markdown(
-                    "**Example:**"
-                )
-
-                st.info(example)
-
-    else:
-
-        st.info(
-            "No specific improvement recommendations returned."
+            """,
+            unsafe_allow_html=True,
         )
 
-    # --------------------------------------------------------
+        for item in improvements:
+
+            st.markdown(
+                f"""
+                <div class="custom-item">
+                    → {item}
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
+
+    # ========================================================
     # ATS KEYWORDS
-    # --------------------------------------------------------
+    # ========================================================
 
-    st.subheader(
-        "🔑 ATS Keywords to Consider"
-    )
-
-    keywords = review.get(
-        "ats_keywords_to_consider",
+    keywords = result.get(
+        "ats_keywords",
         [],
     )
 
     if keywords:
 
-        st.write(
+        st.markdown(
+            """
+            <div class="glass-card">
+
+                <div class="section-title">
+                    🧠 ATS Keywords
+                </div>
+
+                <div class="section-description">
+                    Relevant terms found in the job description that
+                    may be useful when they are genuinely supported
+                    by your experience.
+                </div>
+
+            """,
+            unsafe_allow_html=True,
+        )
+
+        st.markdown(
             " ".join(
-                f"`{keyword}`"
-                for keyword in keywords
+                [
+                    f"`{keyword}`"
+                    for keyword in keywords
+                ]
             )
         )
 
-        st.caption(
-            "Only add a keyword if it genuinely describes "
-            "your experience."
-        )
+        st.markdown("</div>", unsafe_allow_html=True)
 
-    else:
 
-        st.info(
-            "No additional keywords identified."
-        )
-
-    # --------------------------------------------------------
-    # PRIORITY ACTIONS
-    # --------------------------------------------------------
-
-    st.subheader(
-        "🚀 Priority Actions"
-    )
-
-    actions = review.get(
-        "priority_actions",
-        [],
-    )
-
-    if actions:
-
-        for number, action in enumerate(
-            actions,
-            start=1,
-        ):
-
-            st.markdown(
-                f"**{number}.** {action}"
-            )
-
-    # --------------------------------------------------------
+    # ========================================================
     # DISCLAIMER
-    # --------------------------------------------------------
+    # ========================================================
 
-    st.divider()
-
-    st.caption(
-        review.get(
-            "important_disclaimer",
-            "This review is based only on the supplied resume "
-            "and job description.",
-        )
+    disclaimer = result.get(
+        "disclaimer",
+        "This review is informational and does not guarantee hiring outcomes.",
     )
+
+    st.info(disclaimer)
+
+
+# ============================================================
+# FOOTER
+# ============================================================
+
+st.markdown(
+    """
+    <div class="footer">
+        ResumeIQ · AI-powered resume feedback · Built with CrewAI + Groq
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
