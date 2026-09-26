@@ -4,13 +4,15 @@ from typing import Any
 
 import streamlit as st
 from pypdf import PdfReader
-
 from crewai import Agent, Crew, Process, Task, LLM
 
 
 # ============================================================
-# APP CONFIGURATION
+# CONFIGURATION
 # ============================================================
+
+MODEL_NAME = "openai/gpt-oss-120b"
+
 
 st.set_page_config(
     page_title="AI Resume Review Agent",
@@ -19,103 +21,70 @@ st.set_page_config(
 )
 
 
-MODEL_NAME = "openai/gpt-oss-120b"
-
-
-# ============================================================
-# PAGE HEADER
-# ============================================================
-
-st.title("📄 AI Resume Review Agent")
-
-st.markdown(
-    """
-    Compare a resume with a target job description and receive
-    evidence-based, actionable improvement suggestions.
-
-    **Important:** The reviewer only uses information provided in
-    the resume. It does not invent qualifications or experience.
-    """
-)
-
-st.divider()
-
-
 # ============================================================
 # HELPER FUNCTIONS
 # ============================================================
 
-def get_groq_api_key() -> str | None:
-    """
-    Safely retrieve the Groq API key from Streamlit secrets.
-    """
+def get_api_key() -> str | None:
+    """Get the Groq API key from Streamlit Secrets."""
 
     try:
-        api_key = st.secrets["GROQ_API_KEY"]
-        return str(api_key).strip()
+        key = st.secrets["GROQ_API_KEY"]
+        return str(key).strip()
 
     except Exception:
         return None
 
 
 def extract_pdf_text(uploaded_file) -> tuple[str | None, str | None]:
-    """
-    Extract text from an uploaded PDF.
-
-    Returns:
-        (text, error_message)
-    """
+    """Extract readable text from an uploaded PDF."""
 
     try:
         reader = PdfReader(uploaded_file)
 
-        if not reader.pages:
+        if len(reader.pages) == 0:
             return None, "The PDF does not contain any pages."
 
-        extracted_pages = []
+        pages = []
 
         for page_number, page in enumerate(reader.pages, start=1):
+
             try:
-                page_text = page.extract_text()
+                text = page.extract_text()
 
-                if page_text:
-                    extracted_pages.append(page_text)
+                if text:
+                    pages.append(text)
 
-            except Exception as page_error:
+            except Exception as error:
                 return (
                     None,
-                    f"Could not extract text from PDF page {page_number}: "
-                    f"{page_error}",
+                    f"Could not read page {page_number}: {error}",
                 )
 
-        text = "\n\n".join(extracted_pages).strip()
+        extracted_text = "\n\n".join(pages).strip()
 
-        if not text:
+        if not extracted_text:
             return (
                 None,
-                "No readable text was found in the PDF. "
-                "The file may be scanned/image-based. "
+                "No readable text was found in this PDF. "
+                "It may be a scanned/image-based PDF. "
                 "Please paste the resume text instead.",
             )
 
-        return text, None
+        return extracted_text, None
 
     except Exception as error:
         return None, f"Could not read the PDF: {error}"
 
 
-def clean_json_response(raw_response: str) -> dict[str, Any]:
-    """
-    Convert the agent's response into a Python dictionary.
+def parse_agent_output(raw_output: str) -> dict[str, Any]:
+    """Convert the agent response into a Python dictionary."""
 
-    The function also handles cases where the LLM surrounds JSON
-    with Markdown code fences.
-    """
+    text = raw_output.strip()
 
-    text = raw_response.strip()
-
-    # Remove Markdown JSON fences if present.
+    # Remove Markdown code fences if the model adds them.
     if text.startswith("```"):
+
         lines = text.splitlines()
 
         if lines:
@@ -126,73 +95,92 @@ def clean_json_response(raw_response: str) -> dict[str, Any]:
 
         text = "\n".join(lines).strip()
 
-    # Find the outermost JSON object if the model added extra text.
-    first_brace = text.find("{")
-    last_brace = text.rfind("}")
+    # Find JSON object if there is extra text.
+    start = text.find("{")
+    end = text.rfind("}")
 
-    if first_brace != -1 and last_brace != -1:
-        text = text[first_brace:last_brace + 1]
+    if start == -1 or end == -1:
+        raise ValueError("The AI did not return valid JSON.")
+
+    text = text[start:end + 1]
 
     return json.loads(text)
 
 
-def build_resume_review_agent(groq_api_key: str) -> Agent:
-    """
-    Create the single CrewAI resume reviewer agent.
-    """
+# ============================================================
+# CREWAI AGENT
+# ============================================================
+
+def create_resume_agent(api_key: str) -> Agent:
 
     llm = LLM(
         model=f"groq/{MODEL_NAME}",
-        api_key=groq_api_key,
+        api_key=api_key,
         temperature=0,
         max_tokens=5000,
     )
 
-    return Agent(
-        role="Resume and Job Description Matching Specialist",
+    agent = Agent(
+        role="Resume Review Specialist",
+
         goal=(
-            "Evaluate how closely a candidate's provided resume matches "
-            "a target job description and provide accurate, actionable "
-            "recommendations without inventing qualifications."
+            "Compare a candidate's resume with a target job "
+            "description and provide an accurate, evidence-based "
+            "review with actionable improvement suggestions."
         ),
+
         backstory=(
             "You are a careful professional resume reviewer. "
-            "You compare evidence in a resume against the requirements "
-            "of a job description. You never assume that a candidate "
-            "has a skill, qualification, degree, certification, tool, "
-            "or experience unless it is explicitly supported by the "
-            "provided resume. When information is missing, say that "
-            "it is not demonstrated in the provided resume."
+            "You analyze only the information provided in the "
+            "resume and job description. You never invent skills, "
+            "experience, qualifications, certifications, education, "
+            "achievements, technologies, or years of experience."
         ),
+
         llm=llm,
+
         verbose=False,
+
         allow_delegation=False,
+
         max_iter=3,
     )
 
+    return agent
 
-def run_resume_review(
+
+# ============================================================
+# RUN RESUME REVIEW
+# ============================================================
+
+def review_resume(
     resume_text: str,
     job_description: str,
-    groq_api_key: str,
+    api_key: str,
 ) -> dict[str, Any]:
 
-    agent = build_resume_review_agent(groq_api_key)
+    agent = create_resume_agent(api_key)
 
-    task_description = f"""
-You are reviewing a resume against a target job description.
+    task = Task(
+        description=f"""
+You are reviewing a candidate's resume against a target job description.
 
 ================ RESUME ================
+
 {resume_text}
 
 ================ JOB DESCRIPTION ================
+
 {job_description}
 
-================ IMPORTANT RULES ================
+================ RULES ================
 
-1. Use ONLY the information contained in the resume and job description.
+Follow these rules strictly:
 
-2. NEVER invent:
+1. Use ONLY information contained in the supplied resume
+   and job description.
+
+2. NEVER invent or assume:
    - skills
    - work experience
    - years of experience
@@ -202,90 +190,93 @@ You are reviewing a resume against a target job description.
    - achievements
    - technologies
    - responsibilities
+   - projects
    - metrics
 
-3. Distinguish carefully between:
-   - explicitly demonstrated
-   - partially demonstrated
-   - not demonstrated in the provided resume
+3. If a requirement is not mentioned in the resume, say:
 
-4. If the resume does not mention something, do NOT claim that
-   the candidate does not have it.
-
-5. For missing information, use wording such as:
    "Not demonstrated in the provided resume."
 
-6. Recommendations must be actionable and realistic.
+4. Do NOT say that the candidate definitely lacks a skill
+   just because it is not mentioned.
 
-7. Do not recommend adding a qualification unless the candidate
-   actually has that qualification. Instead, recommend verifying,
-   clarifying, or adding it only if it is genuinely possessed.
+5. Distinguish between:
+   - Demonstrated
+   - Partially demonstrated
+   - Not demonstrated
 
-8. Do not make hiring decisions.
+6. Recommendations should be actionable.
 
-9. Do not discriminate based on protected characteristics.
+7. Never recommend that the candidate falsely add a skill,
+   qualification, experience, certification, or achievement.
 
-10. Do not infer age, gender, ethnicity, religion, nationality,
-    disability, marital status, health, or other sensitive traits.
+8. If suggesting a keyword, say that it should only be added
+   if it genuinely describes the candidate's experience.
 
-================ OUTPUT ================
+9. Do not make a hiring decision.
+
+10. Do not infer sensitive personal characteristics.
+
+================ REQUIRED OUTPUT ================
 
 Return ONLY valid JSON.
 
 Use exactly this structure:
 
 {{
-  "overall_summary": "A short factual summary of the match.",
+    "overall_summary": "Short factual summary.",
 
-  "match_level": "Strong / Moderate / Limited / Insufficient evidence",
+    "match_level": "Strong / Moderate / Limited / Insufficient evidence",
 
-  "key_strengths": [
-    {{
-      "requirement": "Requirement from the job description",
-      "evidence": "Specific evidence found in the resume"
-    }}
-  ],
+    "key_strengths": [
+        {{
+            "requirement": "Job requirement",
+            "evidence": "Evidence from the resume"
+        }}
+    ],
 
-  "requirement_analysis": [
-    {{
-      "requirement": "Requirement or responsibility from the job description",
-      "status": "Demonstrated / Partially demonstrated / Not demonstrated",
-      "resume_evidence": "Evidence from resume or 'Not demonstrated in the provided resume.'",
-      "recommendation": "What the candidate should clarify, strengthen, or verify."
-    }}
-  ],
+    "requirement_analysis": [
+        {{
+            "requirement": "Requirement from job description",
+            "status": "Demonstrated / Partially demonstrated / Not demonstrated",
+            "resume_evidence": "Evidence from resume or Not demonstrated in the provided resume.",
+            "recommendation": "Actionable recommendation"
+        }}
+    ],
 
-  "missing_or_unclear_information": [
-    "Important requirement that is not demonstrated or is unclear"
-  ],
+    "missing_or_unclear_information": [
+        "Requirement that is missing or unclear"
+    ],
 
-  "resume_improvements": [
-    {{
-      "area": "Experience / Skills / Summary / Projects / Education / Formatting",
-      "recommendation": "Specific improvement",
-      "example": "A safe example of how to improve wording without inventing facts"
-    }}
-  ],
+    "resume_improvements": [
+        {{
+            "area": "Summary / Experience / Skills / Projects / Education / Formatting",
+            "recommendation": "Specific improvement",
+            "example": "Example wording that does not invent information"
+        }}
+    ],
 
-  "ats_keywords_to_consider": [
-    "Keyword or phrase from the job description that could be naturally included IF supported by the candidate's real experience"
-  ],
+    "ats_keywords_to_consider": [
+        "Relevant keyword from job description"
+    ],
 
-  "priority_actions": [
-    "Most important improvement",
-    "Second most important improvement",
-    "Third most important improvement"
-  ],
+    "priority_actions": [
+        "Most important improvement",
+        "Second important improvement",
+        "Third important improvement"
+    ],
 
-  "important_disclaimer": "This review is based only on the supplied resume and job description. Missing information means it was not demonstrated in the supplied resume; it does not establish that the candidate lacks the qualification."
+    "important_disclaimer": "This review is based only on the supplied resume and job description. Not mentioned means not demonstrated in the supplied resume; it does not prove that the candidate lacks the qualification."
 }}
 
-Return no Markdown and no explanation outside the JSON.
-"""
+Return no Markdown.
+Return no explanation outside the JSON.
+""",
 
-    task = Task(
-        description=task_description,
-        expected_output="A valid JSON object following the exact requested schema.",
+        expected_output=(
+            "A valid JSON object containing the requested resume review."
+        ),
+
         agent=agent,
     )
 
@@ -296,21 +287,23 @@ Return no Markdown and no explanation outside the JSON.
         verbose=False,
     )
 
-    # Small retry loop for transient API failures.
+    # Retry a few times for temporary API problems.
     last_error = None
 
     for attempt in range(3):
+
         try:
+
             result = crew.kickoff()
 
-            raw_output = str(result.raw)
-
-            return clean_json_response(raw_output)
+            return parse_agent_output(
+                str(result.raw)
+            )
 
         except Exception as error:
+
             last_error = error
 
-            # Don't wait after the final attempt.
             if attempt < 2:
                 time.sleep(2 ** attempt)
 
@@ -318,109 +311,141 @@ Return no Markdown and no explanation outside the JSON.
 
 
 # ============================================================
+# USER INTERFACE
+# ============================================================
+
+st.title("📄 AI Resume Review Agent")
+
+st.write(
+    """
+    Upload or paste a resume and provide a target job description.
+    The AI agent will compare them and provide evidence-based,
+    actionable recommendations.
+    """
+)
+
+st.info(
+    "The agent does not invent qualifications. "
+    "If something is not mentioned in the resume, it is reported "
+    "as not demonstrated rather than assumed."
+)
+
+
+# ============================================================
 # SIDEBAR
 # ============================================================
 
 with st.sidebar:
-    st.header("How it works")
 
-    st.markdown(
+    st.header("About this app")
+
+    st.write(
         """
-        **1. Provide your resume**
+        This is a single-agent CrewAI application.
 
-        Paste the text or upload a PDF.
+        **Streamlit**
+        creates the interface.
 
-        **2. Add the target job**
+        **CrewAI**
+        manages the AI agent.
 
-        Paste the job description.
+        **Groq**
+        provides the language model.
 
-        **3. Review**
-
-        The CrewAI agent compares the two.
-
-        **4. Improve**
-
-        Use the recommendations to strengthen your resume.
+        **GPT-OSS 120B**
+        performs the resume analysis.
         """
     )
 
     st.divider()
 
     st.caption(
-        "Model: openai/gpt-oss-120b via Groq"
-    )
-
-    st.caption(
-        "Single-agent CrewAI application"
+        f"Model: {MODEL_NAME}"
     )
 
 
 # ============================================================
-# INPUT SECTION
+# INPUTS
 # ============================================================
 
-left_column, right_column = st.columns(2)
+resume_column, job_column = st.columns(2)
 
-with left_column:
+
+# ------------------------------------------------------------
+# RESUME
+# ------------------------------------------------------------
+
+with resume_column:
+
     st.subheader("1️⃣ Resume")
 
-    resume_input_method = st.radio(
-        "Choose resume input method:",
-        ["Paste text", "Upload PDF"],
+    input_method = st.radio(
+        "Choose how to provide the resume:",
+        [
+            "Paste resume text",
+            "Upload PDF",
+        ],
         horizontal=True,
     )
 
     resume_text = ""
 
-    if resume_input_method == "Paste text":
+    if input_method == "Paste resume text":
 
         resume_text = st.text_area(
-            "Paste your resume here",
+            "Resume text",
             height=400,
             placeholder=(
-                "Paste the complete resume text here..."
+                "Paste the candidate's complete resume here..."
             ),
         )
 
     else:
 
-        uploaded_pdf = st.file_uploader(
+        uploaded_file = st.file_uploader(
             "Upload resume PDF",
             type=["pdf"],
-            help="Upload a text-based PDF resume.",
         )
 
-        if uploaded_pdf is not None:
+        if uploaded_file is not None:
 
-            with st.spinner("Extracting resume text..."):
-                extracted_text, pdf_error = extract_pdf_text(
-                    uploaded_pdf
+            with st.spinner("Reading PDF..."):
+
+                extracted_text, error = extract_pdf_text(
+                    uploaded_file
                 )
 
-            if pdf_error:
-                st.error(pdf_error)
+            if error:
+
+                st.error(error)
 
             else:
-                resume_text = extracted_text or ""
+
+                resume_text = extracted_text
 
                 st.success(
-                    "Resume text extracted successfully."
+                    "PDF text extracted successfully."
                 )
 
-                with st.expander("Preview extracted text"):
-                    st.text_area(
-                        "Extracted resume",
-                        value=resume_text,
-                        height=300,
-                        disabled=True,
+                with st.expander(
+                    "Preview extracted resume"
+                ):
+
+                    st.text(
+                        resume_text
                     )
 
 
-with right_column:
-    st.subheader("2️⃣ Target Job Description")
+# ------------------------------------------------------------
+# JOB DESCRIPTION
+# ------------------------------------------------------------
+
+with job_column:
+
+    st.subheader("2️⃣ Target Job")
 
     job_description = st.text_area(
-        "Paste the job description here",
+        "Job description",
         height=400,
         placeholder=(
             "Paste the complete target job description here..."
@@ -442,154 +467,171 @@ review_button = st.button(
 
 
 # ============================================================
-# VALIDATION + AGENT EXECUTION
+# PROCESS REQUEST
 # ============================================================
 
 if review_button:
 
-    # ----------------------------------------
-    # Validate API key
-    # ----------------------------------------
+    # --------------------------------------------------------
+    # API KEY
+    # --------------------------------------------------------
 
-    groq_api_key = get_groq_api_key()
+    api_key = get_api_key()
 
-    if not groq_api_key:
+    if not api_key:
+
         st.error(
-            "Groq API key is missing. Add GROQ_API_KEY to "
-            "Streamlit Secrets before running the review."
+            "GROQ_API_KEY is missing. "
+            "Add it in Streamlit Cloud → Settings → Secrets."
         )
+
         st.stop()
 
-    # ----------------------------------------
-    # Validate resume
-    # ----------------------------------------
+    # --------------------------------------------------------
+    # RESUME VALIDATION
+    # --------------------------------------------------------
 
     resume_text = resume_text.strip()
 
     if not resume_text:
+
         st.warning(
-            "Please provide your resume by pasting its text "
-            "or uploading a readable PDF."
+            "Please provide a resume by pasting the text "
+            "or uploading a PDF."
         )
+
         st.stop()
 
-    # ----------------------------------------
-    # Validate job description
-    # ----------------------------------------
+    # --------------------------------------------------------
+    # JOB DESCRIPTION VALIDATION
+    # --------------------------------------------------------
 
     job_description = job_description.strip()
 
     if not job_description:
+
         st.warning(
             "Please paste the target job description."
         )
+
         st.stop()
 
-    # ----------------------------------------
-    # Basic size protection
-    # ----------------------------------------
+    # --------------------------------------------------------
+    # BASIC INPUT CHECK
+    # --------------------------------------------------------
 
     if len(resume_text) < 100:
+
         st.warning(
             "The resume appears to contain very little text. "
             "Please provide the complete resume."
         )
+
         st.stop()
 
     if len(job_description) < 100:
+
         st.warning(
             "The job description appears to contain very little text. "
             "Please provide the complete job description."
         )
-        st.stop()
-
-    # ----------------------------------------
-    # Run CrewAI
-    # ----------------------------------------
-
-    st.subheader("🤖 Resume Review")
-
-    progress_message = st.empty()
-
-    try:
-
-        progress_message.info(
-            "The CrewAI reviewer is analyzing the resume..."
-        )
-
-        review = run_resume_review(
-            resume_text=resume_text,
-            job_description=job_description,
-            groq_api_key=groq_api_key,
-        )
-
-        progress_message.empty()
-
-    except Exception as error:
-
-        progress_message.empty()
-
-        error_text = str(error).lower()
-
-        # ----------------------------------------
-        # Rate limit handling
-        # ----------------------------------------
-
-        if (
-            "429" in error_text
-            or "rate limit" in error_text
-            or "too many requests" in error_text
-        ):
-            st.error(
-                "Groq rate limit reached. Please wait a little "
-                "while and try again."
-            )
-
-        # ----------------------------------------
-        # Authentication handling
-        # ----------------------------------------
-
-        elif (
-            "401" in error_text
-            or "authentication" in error_text
-            or "api key" in error_text
-        ):
-            st.error(
-                "Groq authentication failed. Please check that "
-                "your GROQ_API_KEY is correct."
-            )
-
-        # ----------------------------------------
-        # Model / request errors
-        # ----------------------------------------
-
-        elif (
-            "400" in error_text
-            or "model" in error_text
-            or "bad request" in error_text
-        ):
-            st.error(
-                "The AI request was rejected. Check the model "
-                "configuration and try again."
-            )
-
-        # ----------------------------------------
-        # Everything else
-        # ----------------------------------------
-
-        else:
-            st.error(
-                "The resume review could not be completed."
-            )
-
-            with st.expander("Technical details"):
-                st.code(str(error))
 
         st.stop()
+
+    # --------------------------------------------------------
+    # RUN AGENT
+    # --------------------------------------------------------
+
+    with st.spinner(
+        "🤖 Resume Review Agent is analyzing the resume..."
+    ):
+
+        try:
+
+            review = review_resume(
+                resume_text=resume_text,
+                job_description=job_description,
+                api_key=api_key,
+            )
+
+        except Exception as error:
+
+            error_message = str(error).lower()
+
+            if (
+                "429" in error_message
+                or "rate limit" in error_message
+                or "too many requests" in error_message
+            ):
+
+                st.error(
+                    "Groq rate limit reached. "
+                    "Please wait a little and try again."
+                )
+
+            elif (
+                "401" in error_message
+                or "authentication" in error_message
+                or "api key" in error_message
+            ):
+
+                st.error(
+                    "Groq authentication failed. "
+                    "Please check your GROQ_API_KEY in "
+                    "Streamlit Secrets."
+                )
+
+            elif (
+                "403" in error_message
+                or "permission" in error_message
+            ):
+
+                st.error(
+                    "Groq rejected the request because the "
+                    "model is not permitted for this API key/project."
+                )
+
+            elif (
+                "400" in error_message
+                or "bad request" in error_message
+            ):
+
+                st.error(
+                    "Groq rejected the request. "
+                    "Please check the model configuration."
+                )
+
+            else:
+
+                st.error(
+                    "The resume review could not be completed."
+                )
+
+                with st.expander(
+                    "Technical error"
+                ):
+
+                    st.code(
+                        str(error)
+                    )
+
+            st.stop()
 
     # ========================================================
     # DISPLAY RESULTS
     # ========================================================
+
+    st.success(
+        "Resume review completed."
+    )
+
+    st.divider()
+
+    # --------------------------------------------------------
+    # MATCH LEVEL
+    # --------------------------------------------------------
+
+    st.subheader("📊 Overall Assessment")
 
     match_level = review.get(
         "match_level",
@@ -597,54 +639,51 @@ if review_button:
     )
 
     st.metric(
-        "Match assessment",
+        "Match level",
         match_level,
     )
-
-    st.subheader("Summary")
 
     st.write(
         review.get(
             "overall_summary",
-            "No summary was returned.",
+            "No summary available.",
         )
     )
 
     # --------------------------------------------------------
-    # Strengths
+    # STRENGTHS
     # --------------------------------------------------------
 
     st.subheader("💪 Key Strengths")
 
-    strengths = review.get("key_strengths", [])
+    strengths = review.get(
+        "key_strengths",
+        [],
+    )
 
     if strengths:
 
-        for item in strengths:
-
-            requirement = item.get(
-                "requirement",
-                "Requirement",
-            )
-
-            evidence = item.get(
-                "evidence",
-                "No evidence provided.",
-            )
+        for strength in strengths:
 
             st.markdown(
-                f"**{requirement}**"
+                f"**{strength.get('requirement', 'Requirement')}**"
             )
 
-            st.write(evidence)
+            st.write(
+                strength.get(
+                    "evidence",
+                    "No evidence provided.",
+                )
+            )
 
     else:
+
         st.info(
             "No specific strengths were identified."
         )
 
     # --------------------------------------------------------
-    # Requirement analysis
+    # REQUIREMENT ANALYSIS
     # --------------------------------------------------------
 
     st.subheader("📋 Requirement Analysis")
@@ -654,42 +693,54 @@ if review_button:
         [],
     )
 
-    for item in requirements:
+    if requirements:
 
-        requirement = item.get(
-            "requirement",
-            "Requirement",
+        for item in requirements:
+
+            requirement = item.get(
+                "requirement",
+                "Requirement",
+            )
+
+            status = item.get(
+                "status",
+                "Unknown",
+            )
+
+            with st.expander(
+                f"{status} — {requirement}"
+            ):
+
+                st.markdown(
+                    "**Resume evidence**"
+                )
+
+                st.write(
+                    item.get(
+                        "resume_evidence",
+                        "No evidence provided.",
+                    )
+                )
+
+                st.markdown(
+                    "**Recommendation**"
+                )
+
+                st.write(
+                    item.get(
+                        "recommendation",
+                        "No recommendation provided.",
+                    )
+                )
+
+    else:
+
+        st.info(
+            "No requirement analysis was returned."
         )
-
-        status = item.get(
-            "status",
-            "Unknown",
-        )
-
-        evidence = item.get(
-            "resume_evidence",
-            "No evidence provided.",
-        )
-
-        recommendation = item.get(
-            "recommendation",
-            "No recommendation provided.",
-        )
-
-        with st.expander(
-            f"{status}: {requirement}"
-        ):
-
-            st.markdown("**Resume evidence**")
-
-            st.write(evidence)
-
-            st.markdown("**Recommendation**")
-
-            st.write(recommendation)
 
     # --------------------------------------------------------
-    # Missing / unclear
+    # MISSING INFORMATION
     # --------------------------------------------------------
 
     st.subheader(
@@ -704,15 +755,19 @@ if review_button:
     if missing:
 
         for item in missing:
-            st.markdown(f"- {item}")
+
+            st.markdown(
+                f"- {item}"
+            )
 
     else:
+
         st.success(
-            "No major missing or unclear requirements were identified."
+            "No major missing or unclear requirements identified."
         )
 
     # --------------------------------------------------------
-    # Resume improvements
+    # IMPROVEMENTS
     # --------------------------------------------------------
 
     st.subheader(
@@ -724,35 +779,42 @@ if review_button:
         [],
     )
 
-    for item in improvements:
+    if improvements:
 
-        area = item.get(
-            "area",
-            "Resume",
+        for improvement in improvements:
+
+            st.markdown(
+                f"### {improvement.get('area', 'Resume')}"
+            )
+
+            st.write(
+                improvement.get(
+                    "recommendation",
+                    "",
+                )
+            )
+
+            example = improvement.get(
+                "example",
+                "",
+            )
+
+            if example:
+
+                st.markdown(
+                    "**Example:**"
+                )
+
+                st.info(example)
+
+    else:
+
+        st.info(
+            "No specific improvement recommendations returned."
         )
-
-        recommendation = item.get(
-            "recommendation",
-            "",
-        )
-
-        example = item.get(
-            "example",
-            "",
-        )
-
-        st.markdown(
-            f"### {area}"
-        )
-
-        st.write(recommendation)
-
-        if example:
-            st.markdown("**Example:**")
-            st.info(example)
 
     # --------------------------------------------------------
-    # ATS keywords
+    # ATS KEYWORDS
     # --------------------------------------------------------
 
     st.subheader(
@@ -767,41 +829,49 @@ if review_button:
     if keywords:
 
         st.write(
-            ", ".join(
+            " ".join(
                 f"`{keyword}`"
                 for keyword in keywords
             )
         )
 
+        st.caption(
+            "Only add a keyword if it genuinely describes "
+            "your experience."
+        )
+
     else:
 
         st.info(
-            "No additional keywords were identified."
+            "No additional keywords identified."
         )
 
     # --------------------------------------------------------
-    # Priority actions
+    # PRIORITY ACTIONS
     # --------------------------------------------------------
 
     st.subheader(
         "🚀 Priority Actions"
     )
 
-    priority_actions = review.get(
+    actions = review.get(
         "priority_actions",
         [],
     )
 
-    for index, action in enumerate(
-        priority_actions,
-        start=1,
-    ):
-        st.markdown(
-            f"**{index}.** {action}"
-        )
+    if actions:
+
+        for number, action in enumerate(
+            actions,
+            start=1,
+        ):
+
+            st.markdown(
+                f"**{number}.** {action}"
+            )
 
     # --------------------------------------------------------
-    # Disclaimer
+    # DISCLAIMER
     # --------------------------------------------------------
 
     st.divider()
